@@ -37,7 +37,7 @@ public class ApiResponseDto<T> {
         return new ApiResponseDto<>(false, message, null, errorCode);
     }
 
-    public static <T> ApiResponseDto<T> errorOnly(String message) {
+    public static <T> ApiResponseDto<T> error(String message) {
         return error(message, null);
     }
 
