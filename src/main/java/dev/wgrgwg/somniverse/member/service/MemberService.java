@@ -1,9 +1,12 @@
-package dev.wgrgwg.somniverse.member;
+package dev.wgrgwg.somniverse.member.service;
 
+import dev.wgrgwg.somniverse.member.domain.Member;
+import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.MemberResponseDto;
 import dev.wgrgwg.somniverse.member.dto.MemberSignupRequestDto;
 import dev.wgrgwg.somniverse.member.exception.EmailAlreadyExistsException;
 import dev.wgrgwg.somniverse.member.exception.UsernameAlreadyExistsException;
+import dev.wgrgwg.somniverse.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;

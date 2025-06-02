@@ -1,8 +1,9 @@
-package dev.wgrgwg.somniverse.member;
+package dev.wgrgwg.somniverse.member.controller;
 
 import dev.wgrgwg.somniverse.global.dto.ApiResponseDto;
 import dev.wgrgwg.somniverse.member.dto.MemberResponseDto;
 import dev.wgrgwg.somniverse.member.dto.MemberSignupRequestDto;
+import dev.wgrgwg.somniverse.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

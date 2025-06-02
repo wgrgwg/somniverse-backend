@@ -1,6 +1,6 @@
 package dev.wgrgwg.somniverse.member.dto;
 
-import dev.wgrgwg.somniverse.member.Member;
+import dev.wgrgwg.somniverse.member.domain.Member;
 import java.time.LocalDateTime;
 
 public record MemberResponseDto(

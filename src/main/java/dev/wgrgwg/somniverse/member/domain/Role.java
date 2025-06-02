@@ -1,4 +1,4 @@
-package dev.wgrgwg.somniverse.member;
+package dev.wgrgwg.somniverse.member.domain;
 
 public enum Role {
     ADMIN("책임자"),

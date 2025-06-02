@@ -3,10 +3,14 @@ package dev.wgrgwg.somniverse.member;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import dev.wgrgwg.somniverse.member.domain.Member;
+import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.MemberResponseDto;
 import dev.wgrgwg.somniverse.member.dto.MemberSignupRequestDto;
 import dev.wgrgwg.somniverse.member.exception.EmailAlreadyExistsException;
 import dev.wgrgwg.somniverse.member.exception.UsernameAlreadyExistsException;
+import dev.wgrgwg.somniverse.member.repository.MemberRepository;
+import dev.wgrgwg.somniverse.member.service.MemberService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

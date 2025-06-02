@@ -1,4 +1,4 @@
-package dev.wgrgwg.somniverse.member;
+package dev.wgrgwg.somniverse.member.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
