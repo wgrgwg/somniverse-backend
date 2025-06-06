@@ -1,11 +1,11 @@
 package dev.wgrgwg.somniverse.member.service;
 
+import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.member.domain.Member;
 import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.MemberResponseDto;
 import dev.wgrgwg.somniverse.member.dto.MemberSignupRequestDto;
-import dev.wgrgwg.somniverse.member.exception.EmailAlreadyExistsException;
-import dev.wgrgwg.somniverse.member.exception.UsernameAlreadyExistsException;
+import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
 import dev.wgrgwg.somniverse.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +24,11 @@ public class MemberService {
     @Transactional
     public MemberResponseDto signup(MemberSignupRequestDto memberSignupRequestDto) {
         if (memberRepository.existsByEmail(memberSignupRequestDto.email())) {
-            throw new EmailAlreadyExistsException();
+            throw new CustomException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         if (memberRepository.existsByUsername(memberSignupRequestDto.username())) {
-            throw new UsernameAlreadyExistsException();
+            throw new CustomException(MemberErrorCode.USERNAME_ALREADY_EXISTS);
         }
 
         String encodedPassword = passwordEncoder.encode(memberSignupRequestDto.password());

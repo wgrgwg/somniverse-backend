@@ -4,12 +4,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.member.domain.Member;
 import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.MemberResponseDto;
 import dev.wgrgwg.somniverse.member.dto.MemberSignupRequestDto;
-import dev.wgrgwg.somniverse.member.exception.EmailAlreadyExistsException;
-import dev.wgrgwg.somniverse.member.exception.UsernameAlreadyExistsException;
+import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
 import dev.wgrgwg.somniverse.member.repository.MemberRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -41,7 +41,7 @@ class MemberServiceTest {
         // when
         // then
         Assertions.assertThatThrownBy(() -> memberService.signup(dto)).isInstanceOf(
-            EmailAlreadyExistsException.class);
+            CustomException.class).hasMessage(MemberErrorCode.EMAIL_ALREADY_EXISTS.getMessage());;
     }
 
     @Test
@@ -55,7 +55,7 @@ class MemberServiceTest {
         // when
         // then
         Assertions.assertThatThrownBy(() -> memberService.signup(dto)).isInstanceOf(
-            UsernameAlreadyExistsException.class);
+            CustomException.class).hasMessage(MemberErrorCode.USERNAME_ALREADY_EXISTS.getMessage());;
     }
 
     @Test

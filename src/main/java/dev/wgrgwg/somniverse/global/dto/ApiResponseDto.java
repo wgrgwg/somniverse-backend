@@ -29,6 +29,10 @@ public class ApiResponseDto<T> {
         return new ApiResponseDto<>(true, message, null, null);
     }
 
+    public static <T> ApiResponseDto<T> error(String message, T data, String errorCode) {
+        return new ApiResponseDto<>(false, message, data, errorCode);
+    }
+
     public static <T> ApiResponseDto<T> error(String message, T data) {
         return new ApiResponseDto<>(false, message, data, null);
     }

@@ -8,11 +8,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.wgrgwg.somniverse.config.SecurityConfig;
+import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.MemberResponseDto;
 import dev.wgrgwg.somniverse.member.dto.MemberSignupRequestDto;
-import dev.wgrgwg.somniverse.member.exception.EmailAlreadyExistsException;
-import dev.wgrgwg.somniverse.member.exception.UsernameAlreadyExistsException;
+import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
 import dev.wgrgwg.somniverse.member.message.MemberSuccessMessage;
 import dev.wgrgwg.somniverse.member.service.MemberService;
 import java.time.LocalDateTime;
@@ -80,7 +80,8 @@ class MemberControllerTest {
             resultActions.andExpect(status().isCreated())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value(MemberSuccessMessage.SIGNUP_SUCCESS.getMessage()))
+                .andExpect(
+                    jsonPath("$.message").value(MemberSuccessMessage.SIGNUP_SUCCESS.getMessage()))
                 .andExpect(jsonPath("$.data.email").value(signupRequestDto.email()))
                 .andExpect(jsonPath("$.data.username").value(signupRequestDto.username()))
                 .andExpect(jsonPath("$.data.role").value(Role.USER.toString()));
@@ -91,7 +92,7 @@ class MemberControllerTest {
         void signup_fail_emailAlreadyExists_test() throws Exception {
             // given
             when(memberService.signup(signupRequestDto)).thenThrow(
-                new EmailAlreadyExistsException());
+                new CustomException(MemberErrorCode.EMAIL_ALREADY_EXISTS));
 
             // when
             ResultActions resultActions = mockMvc.perform(post("/api/auth/signup")
@@ -102,7 +103,10 @@ class MemberControllerTest {
             resultActions
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("이미 사용중인 이메일입니다"));
+                .andExpect(
+                    jsonPath("$.message").value(MemberErrorCode.EMAIL_ALREADY_EXISTS.getMessage()))
+                .andExpect(
+                    jsonPath("$.errorCode").value(MemberErrorCode.EMAIL_ALREADY_EXISTS.getCode()));
         }
 
         @Test
@@ -110,7 +114,7 @@ class MemberControllerTest {
         void signup_fail_usernameAlreadyExists_test() throws Exception {
             // given
             when(memberService.signup(signupRequestDto)).thenThrow(
-                new UsernameAlreadyExistsException());
+                new CustomException(MemberErrorCode.USERNAME_ALREADY_EXISTS));
 
             // when
             ResultActions resultActions = mockMvc.perform(post("/api/auth/signup")
@@ -121,7 +125,12 @@ class MemberControllerTest {
             resultActions
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("이미 사용중인 사용자명입니다"));
+                .andExpect(
+                    jsonPath("$.message").value(
+                        MemberErrorCode.USERNAME_ALREADY_EXISTS.getMessage()))
+                .andExpect(
+                    jsonPath("$.errorCode").value(
+                        MemberErrorCode.USERNAME_ALREADY_EXISTS.getCode()));
         }
     }
 }
