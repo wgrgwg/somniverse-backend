@@ -13,6 +13,7 @@ import dev.wgrgwg.somniverse.member.dto.MemberResponseDto;
 import dev.wgrgwg.somniverse.member.dto.MemberSignupRequestDto;
 import dev.wgrgwg.somniverse.member.exception.EmailAlreadyExistsException;
 import dev.wgrgwg.somniverse.member.exception.UsernameAlreadyExistsException;
+import dev.wgrgwg.somniverse.member.message.MemberSuccessMessage;
 import dev.wgrgwg.somniverse.member.service.MemberService;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,7 +80,7 @@ class MemberControllerTest {
             resultActions.andExpect(status().isCreated())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("회원가입이 완료되었습니다"))
+                .andExpect(jsonPath("$.message").value(MemberSuccessMessage.SIGNUP_SUCCESS.getMessage()))
                 .andExpect(jsonPath("$.data.email").value(signupRequestDto.email()))
                 .andExpect(jsonPath("$.data.username").value(signupRequestDto.username()))
                 .andExpect(jsonPath("$.data.role").value(Role.USER.toString()));

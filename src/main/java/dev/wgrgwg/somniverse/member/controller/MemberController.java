@@ -3,6 +3,7 @@ package dev.wgrgwg.somniverse.member.controller;
 import dev.wgrgwg.somniverse.global.dto.ApiResponseDto;
 import dev.wgrgwg.somniverse.member.dto.MemberResponseDto;
 import dev.wgrgwg.somniverse.member.dto.MemberSignupRequestDto;
+import dev.wgrgwg.somniverse.member.message.MemberSuccessMessage;
 import dev.wgrgwg.somniverse.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class MemberController {
 
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .body(ApiResponseDto.success("회원가입이 완료되었습니다.", memberResponseDto));
+            .body(ApiResponseDto.success(MemberSuccessMessage.SIGNUP_SUCCESS.getMessage(),
+                memberResponseDto));
     }
 }
