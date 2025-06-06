@@ -1,4 +1,4 @@
-package dev.wgrgwg.somniverse.member;
+package dev.wgrgwg.somniverse.member.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -6,6 +6,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -35,4 +37,16 @@ public class Member {
     private LocalDateTime updatedAt;
     private boolean isDeleted;
     private LocalDateTime deletedAt;
+
+    @PrePersist
+    public void onCreate() {
+        this.isDeleted = false;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }
