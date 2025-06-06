@@ -1,6 +1,7 @@
-package dev.wgrgwg.somniverse.member;
+package dev.wgrgwg.somniverse.member.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import dev.wgrgwg.somniverse.member.domain.Member;
@@ -10,7 +11,6 @@ import dev.wgrgwg.somniverse.member.dto.MemberSignupRequestDto;
 import dev.wgrgwg.somniverse.member.exception.EmailAlreadyExistsException;
 import dev.wgrgwg.somniverse.member.exception.UsernameAlreadyExistsException;
 import dev.wgrgwg.somniverse.member.repository.MemberRepository;
-import dev.wgrgwg.somniverse.member.service.MemberService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -66,6 +66,7 @@ class MemberServiceTest {
             "password");
         when(memberRepository.existsByEmail(dto.email())).thenReturn(false);
         when(memberRepository.existsByUsername(dto.username())).thenReturn(false);
+        when(passwordEncoder.encode(dto.password())).thenReturn("encoded-password");
 
         Member savedMember = Member.builder()
             .id(1L)
@@ -81,6 +82,7 @@ class MemberServiceTest {
         MemberResponseDto responseDto = memberService.signup(dto);
 
         // then
+        verify(memberRepository).save(any(Member.class));
         Assertions.assertThat(responseDto.email()).isEqualTo(dto.email());
         Assertions.assertThat(responseDto.username()).isEqualTo(dto.username());
         Assertions.assertThat(responseDto.role()).isEqualTo(Role.USER.toString());
