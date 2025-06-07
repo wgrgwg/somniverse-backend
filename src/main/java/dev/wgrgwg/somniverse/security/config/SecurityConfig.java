@@ -1,4 +1,4 @@
-package dev.wgrgwg.somniverse.config;
+package dev.wgrgwg.somniverse.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
