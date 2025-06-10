@@ -8,8 +8,10 @@ import dev.wgrgwg.somniverse.member.dto.MemberResponseDto;
 import dev.wgrgwg.somniverse.member.dto.MemberSignupRequestDto;
 import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
 import dev.wgrgwg.somniverse.member.repository.MemberRepository;
+import dev.wgrgwg.somniverse.security.jwt.domain.RefreshToken;
 import dev.wgrgwg.somniverse.security.jwt.dto.TokenDto;
 import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
+import dev.wgrgwg.somniverse.security.jwt.repository.RefreshTokenRepository;
 import dev.wgrgwg.somniverse.security.userdetails.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 public class MemberService {
+
+    private final RefreshTokenRepository refreshTokenRepository;
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
@@ -66,7 +70,12 @@ public class MemberService {
 
         TokenDto tokenDto = jwtProvider.generateToken(member);
 
-        // refreshToken db에 저장 필요
+        RefreshToken refreshToken = RefreshToken.builder()
+            .member(member)
+            .value(tokenDto.refreshToken())
+            .build();
+
+        refreshTokenRepository.save(refreshToken);
 
         return tokenDto;
     }
