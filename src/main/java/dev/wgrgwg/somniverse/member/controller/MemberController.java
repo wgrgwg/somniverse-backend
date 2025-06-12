@@ -1,8 +1,8 @@
 package dev.wgrgwg.somniverse.member.controller;
 
 import dev.wgrgwg.somniverse.global.dto.ApiResponseDto;
-import dev.wgrgwg.somniverse.member.dto.MemberResponseDto;
-import dev.wgrgwg.somniverse.member.dto.MemberSignupRequestDto;
+import dev.wgrgwg.somniverse.member.dto.request.SignupRequest;
+import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
 import dev.wgrgwg.somniverse.member.message.MemberSuccessMessage;
 import dev.wgrgwg.somniverse.member.service.MemberService;
 import jakarta.validation.Valid;
@@ -24,13 +24,13 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponseDto<MemberResponseDto>> signup(@Valid @RequestBody
-    MemberSignupRequestDto memberSignupRequestDto) {
-        MemberResponseDto memberResponseDto = memberService.signup(memberSignupRequestDto);
+    public ResponseEntity<ApiResponseDto<MemberResponse>> signup(@Valid @RequestBody
+    SignupRequest signupRequest) {
+        MemberResponse memberResponse = memberService.signup(signupRequest);
 
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(ApiResponseDto.success(MemberSuccessMessage.SIGNUP_SUCCESS.getMessage(),
-                memberResponseDto));
+                memberResponse));
     }
 }

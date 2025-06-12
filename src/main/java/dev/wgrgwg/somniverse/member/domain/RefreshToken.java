@@ -1,6 +1,5 @@
-package dev.wgrgwg.somniverse.security.jwt.domain;
+package dev.wgrgwg.somniverse.member.domain;
 
-import dev.wgrgwg.somniverse.member.domain.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

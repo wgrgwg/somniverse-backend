@@ -1,4 +1,4 @@
-package dev.wgrgwg.somniverse.security.jwt.dto;
+package dev.wgrgwg.somniverse.member.dto.request;
 
 public record ReissueRequest(
     String accessToken,

@@ -1,6 +1,6 @@
-package dev.wgrgwg.somniverse.security.jwt.repository;
+package dev.wgrgwg.somniverse.member.repository;
 
-import dev.wgrgwg.somniverse.security.jwt.domain.RefreshToken;
+import dev.wgrgwg.somniverse.member.domain.RefreshToken;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -9,8 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.member.domain.Role;
-import dev.wgrgwg.somniverse.member.dto.MemberResponseDto;
-import dev.wgrgwg.somniverse.member.dto.MemberSignupRequestDto;
+import dev.wgrgwg.somniverse.member.dto.request.SignupRequest;
+import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
 import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
 import dev.wgrgwg.somniverse.member.message.MemberSuccessMessage;
 import dev.wgrgwg.somniverse.member.service.MemberService;
@@ -41,18 +41,18 @@ class MemberControllerTest {
     @MockitoBean
     private MemberService memberService;
 
-    private MemberSignupRequestDto signupRequestDto;
-    private MemberResponseDto responseDto;
+    private SignupRequest signupRequestDto;
+    private MemberResponse responseDto;
 
     @BeforeEach
     void init() {
-        signupRequestDto = new MemberSignupRequestDto(
+        signupRequestDto = new SignupRequest(
             "user01@email.com",
             "password01!",
             "user01"
         );
 
-        responseDto = new MemberResponseDto(
+        responseDto = new MemberResponse(
             1L,
             "user01@email.com",
             "user01",

@@ -2,7 +2,7 @@ package dev.wgrgwg.somniverse.security.jwt.provider;
 
 import dev.wgrgwg.somniverse.member.domain.Member;
 import dev.wgrgwg.somniverse.member.domain.Role;
-import dev.wgrgwg.somniverse.security.jwt.dto.TokenDto;
+import dev.wgrgwg.somniverse.member.dto.response.TokenResponse;
 import dev.wgrgwg.somniverse.security.jwt.properties.JwtProperties;
 import dev.wgrgwg.somniverse.security.userdetails.CustomUserDetails;
 import io.jsonwebtoken.Claims;
@@ -25,7 +25,7 @@ public class JwtProvider {
 
     private final JwtProperties jwtProperties;
 
-    public TokenDto generateToken(Member member) {
+    public TokenResponse generateToken(Member member) {
         String subject = member.getId().toString();
 
         String role = member.getRole().name();
@@ -36,7 +36,7 @@ public class JwtProvider {
         String refreshToken = createJwt(subject, "refresh", role,
             jwtProperties.getRefreshTokenExpirationMs());
 
-        return new TokenDto(accessToken, refreshToken);
+        return new TokenResponse(accessToken, refreshToken);
     }
 
     private String createJwt(String subject, String category, String role, Long expiredMs) {

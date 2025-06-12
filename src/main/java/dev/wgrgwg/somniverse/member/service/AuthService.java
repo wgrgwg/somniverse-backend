@@ -1,26 +1,25 @@
-package dev.wgrgwg.somniverse.security.jwt.service;
+package dev.wgrgwg.somniverse.member.service;
 
 import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.member.domain.Member;
+import dev.wgrgwg.somniverse.member.domain.RefreshToken;
+import dev.wgrgwg.somniverse.member.dto.response.TokenResponse;
+import dev.wgrgwg.somniverse.member.repository.RefreshTokenRepository;
 import dev.wgrgwg.somniverse.security.exception.SecurityErrorCode;
-import dev.wgrgwg.somniverse.security.jwt.domain.RefreshToken;
-import dev.wgrgwg.somniverse.security.jwt.dto.ReissueResponse;
-import dev.wgrgwg.somniverse.security.jwt.dto.TokenDto;
 import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
-import dev.wgrgwg.somniverse.security.jwt.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class ReissueService {
+public class AuthService {
 
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
-    public ReissueResponse reissue(String refreshToken) {
+    public TokenResponse reissue(String refreshToken) {
         if (!jwtProvider.validateToken(refreshToken)) {
             throw new CustomException(SecurityErrorCode.INVALID_REFRESH_TOKEN);
         }
@@ -33,10 +32,10 @@ public class ReissueService {
             throw new CustomException(SecurityErrorCode.MEMBER_NOT_FOUND);
         }
 
-        TokenDto newTokens = jwtProvider.generateToken(member);
+        TokenResponse newTokens = jwtProvider.generateToken(member);
 
         refreshTokenFromDB.updateValue(newTokens.refreshToken());
 
-        return new ReissueResponse(newTokens.accessToken(), newTokens.refreshToken());
+        return new TokenResponse(newTokens.accessToken(), newTokens.refreshToken());
     }
 }

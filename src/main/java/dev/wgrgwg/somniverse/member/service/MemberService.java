@@ -2,16 +2,16 @@ package dev.wgrgwg.somniverse.member.service;
 
 import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.member.domain.Member;
+import dev.wgrgwg.somniverse.member.domain.RefreshToken;
 import dev.wgrgwg.somniverse.member.domain.Role;
-import dev.wgrgwg.somniverse.member.dto.MemberLoginRequestDto;
-import dev.wgrgwg.somniverse.member.dto.MemberResponseDto;
-import dev.wgrgwg.somniverse.member.dto.MemberSignupRequestDto;
+import dev.wgrgwg.somniverse.member.dto.request.LoginRequest;
+import dev.wgrgwg.somniverse.member.dto.request.SignupRequest;
+import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
+import dev.wgrgwg.somniverse.member.dto.response.TokenResponse;
 import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
 import dev.wgrgwg.somniverse.member.repository.MemberRepository;
-import dev.wgrgwg.somniverse.security.jwt.domain.RefreshToken;
-import dev.wgrgwg.somniverse.security.jwt.dto.TokenDto;
+import dev.wgrgwg.somniverse.member.repository.RefreshTokenRepository;
 import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
-import dev.wgrgwg.somniverse.security.jwt.repository.RefreshTokenRepository;
 import dev.wgrgwg.somniverse.security.userdetails.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,32 +35,32 @@ public class MemberService {
     private final JwtProvider jwtProvider;
 
     @Transactional
-    public MemberResponseDto signup(MemberSignupRequestDto memberSignupRequestDto) {
-        if (memberRepository.existsByEmail(memberSignupRequestDto.email())) {
+    public MemberResponse signup(SignupRequest signupRequest) {
+        if (memberRepository.existsByEmail(signupRequest.email())) {
             throw new CustomException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
-        if (memberRepository.existsByUsername(memberSignupRequestDto.username())) {
+        if (memberRepository.existsByUsername(signupRequest.username())) {
             throw new CustomException(MemberErrorCode.USERNAME_ALREADY_EXISTS);
         }
 
-        String encodedPassword = passwordEncoder.encode(memberSignupRequestDto.password());
+        String encodedPassword = passwordEncoder.encode(signupRequest.password());
 
         Member newMember = Member.builder()
-            .username(memberSignupRequestDto.username())
-            .email(memberSignupRequestDto.email())
+            .username(signupRequest.username())
+            .email(signupRequest.email())
             .password(encodedPassword)
             .role(Role.USER)
             .build();
 
         Member savedMember = memberRepository.save(newMember);
 
-        return MemberResponseDto.fromEntity(savedMember);
+        return MemberResponse.fromEntity(savedMember);
     }
 
-    public TokenDto login(MemberLoginRequestDto memberLoginRequestDto) {
+    public TokenResponse login(LoginRequest loginRequest) {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-            memberLoginRequestDto.email(), memberLoginRequestDto.password());
+            loginRequest.email(), loginRequest.password());
 
         Authentication authentication = authenticationManager.authenticate(authToken);
 
@@ -68,15 +68,15 @@ public class MemberService {
 
         Member member = userDetails.getMember();
 
-        TokenDto tokenDto = jwtProvider.generateToken(member);
+        TokenResponse tokenResponse = jwtProvider.generateToken(member);
 
         RefreshToken refreshToken = RefreshToken.builder()
             .member(member)
-            .value(tokenDto.refreshToken())
+            .value(tokenResponse.refreshToken())
             .build();
 
         refreshTokenRepository.save(refreshToken);
 
-        return tokenDto;
+        return tokenResponse;
     }
 }
