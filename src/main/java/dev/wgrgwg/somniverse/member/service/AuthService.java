@@ -4,8 +4,8 @@ import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.member.domain.Member;
 import dev.wgrgwg.somniverse.member.domain.RefreshToken;
 import dev.wgrgwg.somniverse.member.dto.response.TokenResponse;
+import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
 import dev.wgrgwg.somniverse.member.repository.RefreshTokenRepository;
-import dev.wgrgwg.somniverse.security.exception.SecurityErrorCode;
 import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,15 +21,15 @@ public class AuthService {
     @Transactional
     public TokenResponse reissue(String refreshToken) {
         if (!jwtProvider.validateToken(refreshToken)) {
-            throw new CustomException(SecurityErrorCode.INVALID_REFRESH_TOKEN);
+            throw new CustomException(MemberErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         RefreshToken refreshTokenFromDB = refreshTokenRepository.findByValue(refreshToken)
-            .orElseThrow(() -> new CustomException(SecurityErrorCode.REFRESH_TOKEN_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(MemberErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
         Member member = refreshTokenFromDB.getMember();
         if (member == null) {
-            throw new CustomException(SecurityErrorCode.MEMBER_NOT_FOUND);
+            throw new CustomException(MemberErrorCode.MEMBER_FOR_TOKEN_NOT_FOUND);
         }
 
         TokenResponse newTokens = jwtProvider.generateToken(member);
