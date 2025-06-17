@@ -15,6 +15,7 @@ import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
 import dev.wgrgwg.somniverse.member.message.MemberSuccessMessage;
 import dev.wgrgwg.somniverse.member.service.MemberService;
 import dev.wgrgwg.somniverse.security.config.SecurityConfig;
+import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,6 +41,9 @@ class MemberControllerTest {
 
     @MockitoBean
     private MemberService memberService;
+
+    @MockitoBean
+    private JwtProvider jwtProvider;
 
     private SignupRequest signupRequestDto;
     private MemberResponse responseDto;
@@ -72,7 +76,7 @@ class MemberControllerTest {
             when(memberService.signup(signupRequestDto)).thenReturn(responseDto);
 
             // when
-            ResultActions resultActions = mockMvc.perform(post("/api/auth/signup")
+            ResultActions resultActions = mockMvc.perform(post("/api/auth/members")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signupRequestDto)));
 
@@ -95,7 +99,7 @@ class MemberControllerTest {
                 new CustomException(MemberErrorCode.EMAIL_ALREADY_EXISTS));
 
             // when
-            ResultActions resultActions = mockMvc.perform(post("/api/auth/signup")
+            ResultActions resultActions = mockMvc.perform(post("/api/auth/members")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signupRequestDto)));
 
@@ -117,7 +121,7 @@ class MemberControllerTest {
                 new CustomException(MemberErrorCode.USERNAME_ALREADY_EXISTS));
 
             // when
-            ResultActions resultActions = mockMvc.perform(post("/api/auth/signup")
+            ResultActions resultActions = mockMvc.perform(post("/api/auth/members")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signupRequestDto)));
 
