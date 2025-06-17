@@ -14,7 +14,9 @@ public enum MemberErrorCode implements ErrorCode {
     INVALID_REFRESH_TOKEN("MEMBER_004", "유효하지 않은 Refresh Token입니다", HttpStatus.UNAUTHORIZED),
     REFRESH_TOKEN_NOT_FOUND("MEMBER_005", "로그아웃된 사용자이거나 유효하지 않은 토큰입니다", HttpStatus.UNAUTHORIZED),
     MEMBER_FOR_TOKEN_NOT_FOUND("MEMBER_006", "토큰에 해당하는 사용자 정보를 찾을 수 없습니다",
-        HttpStatus.INTERNAL_SERVER_ERROR);
+        HttpStatus.INTERNAL_SERVER_ERROR),
+
+    INVALID_CREDENTIALS("MEMBER_007", "아이디 또는 비밀번호가 올바르지 않습니다", HttpStatus.UNAUTHORIZED);
 
     private final String code;
     private final String message;

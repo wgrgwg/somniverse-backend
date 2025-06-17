@@ -4,9 +4,11 @@ import dev.wgrgwg.somniverse.global.dto.ApiResponseDto;
 import dev.wgrgwg.somniverse.global.dto.FieldErrorDto;
 import dev.wgrgwg.somniverse.global.errorcode.CommonErrorCode;
 import dev.wgrgwg.somniverse.global.errorcode.ErrorCode;
+import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -29,12 +31,21 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ApiResponseDto<Void>> handleCustomException(CustomException ex) {
+    public ResponseEntity<ApiResponseDto<Object>> handleCustomException(CustomException ex) {
         ErrorCode errorCode = ex.getErrorCode();
         log.error("예외 발생: {}", ex.getMessage());
 
         return ResponseEntity.status(errorCode.getHttpStatus())
             .body(ApiResponseDto.error(errorCode.getMessage(), errorCode.getCode()));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiResponseDto<Object>> handleBadCredentialsException(Exception ex) {
+        log.error("예외 발생: {}", ex.getMessage());
+
+        return ResponseEntity.status(MemberErrorCode.INCORRECT_EMAIL_OR_PASSWORD.getHttpStatus())
+            .body(ApiResponseDto.error(MemberErrorCode.INCORRECT_EMAIL_OR_PASSWORD.getMessage(),
+                MemberErrorCode.INCORRECT_EMAIL_OR_PASSWORD.getCode()));
     }
 
     @ExceptionHandler(Exception.class)
