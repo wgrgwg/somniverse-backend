@@ -33,15 +33,16 @@ public class MemberService {
 
         String encodedPassword = passwordEncoder.encode(signupRequest.password());
 
-        Member newMember = Member.builder()
-            .username(signupRequest.username())
-            .email(signupRequest.email())
-            .password(encodedPassword)
-            .role(Role.USER)
-            .build();
+        Member newMember = Member.builder().username(signupRequest.username())
+            .email(signupRequest.email()).password(encodedPassword).role(Role.USER).build();
 
         Member savedMember = memberRepository.save(newMember);
 
         return MemberResponse.fromEntity(savedMember);
+    }
+
+    public Member findById(Long id) {
+        return memberRepository.findById(id)
+            .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 }
