@@ -16,7 +16,9 @@ public enum MemberErrorCode implements ErrorCode {
     MEMBER_FOR_TOKEN_NOT_FOUND("MEMBER_006", "토큰에 해당하는 사용자 정보를 찾을 수 없습니다",
         HttpStatus.INTERNAL_SERVER_ERROR),
 
-    INVALID_CREDENTIALS("MEMBER_007", "아이디 또는 비밀번호가 올바르지 않습니다", HttpStatus.UNAUTHORIZED);
+    INVALID_CREDENTIALS("MEMBER_007", "아이디 또는 비밀번호가 올바르지 않습니다", HttpStatus.UNAUTHORIZED),
+
+    MEMBER_NOT_FOUND("MEMBER_008", "사용자를 찾을 수 없습니다", HttpStatus.NOT_FOUND);
 
     private final String code;
     private final String message;
