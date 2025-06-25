@@ -9,12 +9,11 @@ import static org.mockito.Mockito.when;
 
 import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.member.domain.Member;
-import dev.wgrgwg.somniverse.member.domain.RefreshToken;
 import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.request.LoginRequest;
 import dev.wgrgwg.somniverse.member.dto.response.TokenResponse;
 import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
-import dev.wgrgwg.somniverse.member.repository.RefreshTokenRepository;
+import dev.wgrgwg.somniverse.member.repository.RefreshTokenRedisRepository;
 import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
 import dev.wgrgwg.somniverse.security.userdetails.CustomUserDetails;
 import java.util.Optional;
@@ -37,7 +36,9 @@ class AuthServiceTest {
     @Mock
     private JwtProvider jwtProvider;
     @Mock
-    private RefreshTokenRepository refreshTokenRepository;
+    private RefreshTokenRedisRepository refreshTokenRedisRepository;
+    @Mock
+    private MemberService memberService;
 
     @InjectMocks
     private AuthService authService;
@@ -77,7 +78,7 @@ class AuthServiceTest {
         // then
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtProvider).generateToken(testMember);
-        verify(refreshTokenRepository).save(any(RefreshToken.class));
+        verify(refreshTokenRedisRepository).save("refresh-token", "1");
         assertThat(result.accessToken()).isEqualTo("access-token");
         assertThat(result.refreshToken()).isEqualTo("refresh-token");
     }
@@ -86,26 +87,27 @@ class AuthServiceTest {
     @DisplayName("토큰 재발급 성공 시 새로운 토큰 응답 반환")
     void reissue_success_shouldReturnNewTokenResponse() {
         // given
-        String oldRefreshTokenValue = "old-refresh-token";
-        RefreshToken refreshTokenFromDB = RefreshToken.builder()
-            .member(testMember)
-            .value(oldRefreshTokenValue)
-            .build();
-        TokenResponse newTokens = new TokenResponse("new-access-token", "new-refresh-token");
+        String oldRefreshToken = "old-refresh-token";
+        String newRefreshToken = "new-refresh-token";
+        TokenResponse newTokens = new TokenResponse("new-access-token", newRefreshToken);
 
-        when(jwtProvider.validateToken(oldRefreshTokenValue)).thenReturn(true);
-        when(refreshTokenRepository.findByValue(oldRefreshTokenValue)).thenReturn(
-            Optional.of(refreshTokenFromDB));
+        when(jwtProvider.validateToken(oldRefreshToken)).thenReturn(true);
+        when(refreshTokenRedisRepository.findMemberIdByToken(oldRefreshToken))
+            .thenReturn(Optional.of("1"));
+        when(memberService.findById(1L)).thenReturn(testMember);
         when(jwtProvider.generateToken(testMember)).thenReturn(newTokens);
 
         // when
-        TokenResponse result = authService.reissue(oldRefreshTokenValue);
+        TokenResponse result = authService.reissue(oldRefreshToken);
 
         // then
-        verify(jwtProvider).validateToken(oldRefreshTokenValue);
-        verify(refreshTokenRepository).findByValue(oldRefreshTokenValue);
+        verify(jwtProvider).validateToken(oldRefreshToken);
+        verify(refreshTokenRedisRepository).findMemberIdByToken(oldRefreshToken);
+        verify(memberService).findById(1L);
         verify(jwtProvider).generateToken(testMember);
-        assertThat(refreshTokenFromDB.getValue()).isEqualTo("new-refresh-token"); // 토큰 값 업데이트 확인
+        verify(refreshTokenRedisRepository).delete(oldRefreshToken);
+        verify(refreshTokenRedisRepository).save(newRefreshToken, "1");
+
         assertThat(result.accessToken()).isEqualTo("new-access-token");
         assertThat(result.refreshToken()).isEqualTo("new-refresh-token");
     }
@@ -124,51 +126,50 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("DB에 없는 refresh token으로 재발급 시도하면 예외 발생")
-    void reissue_whenTokenNotFoundInDB_shouldThrowException() {
+    @DisplayName("Redis에 없는 refresh token으로 재발급 시도하면 예외 발생")
+    void reissue_whenTokenNotFoundInRedis_shouldThrowException() {
         // given
-        String refreshTokenNotInDB = "not-found-refresh-token";
-        when(jwtProvider.validateToken(refreshTokenNotInDB)).thenReturn(true);
-        when(refreshTokenRepository.findByValue(refreshTokenNotInDB)).thenReturn(Optional.empty());
+        String notFoundToken = "not-found-refresh-token";
+        when(jwtProvider.validateToken(notFoundToken)).thenReturn(true);
+        when(refreshTokenRedisRepository.findMemberIdByToken(notFoundToken)).thenReturn(
+            Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> authService.reissue(refreshTokenNotInDB))
+        assertThatThrownBy(() -> authService.reissue(notFoundToken))
             .isInstanceOf(CustomException.class)
             .hasMessage(MemberErrorCode.REFRESH_TOKEN_NOT_FOUND.getMessage());
     }
 
     @Test
-    @DisplayName("로그아웃 성공 시 DB에서 refresh token 삭제")
+    @DisplayName("로그아웃 성공 시 Redis에서 refresh token 삭제")
     void logout_success_shouldDeleteRefreshToken() {
         // given
         String refreshTokenValue = "refresh-token-to-delete";
-        RefreshToken refreshToken = RefreshToken.builder()
-            .member(testMember)
-            .value(refreshTokenValue)
-            .build();
-        when(refreshTokenRepository.findByValue(refreshTokenValue)).thenReturn(
-            Optional.of(refreshToken));
+        when(refreshTokenRedisRepository.findMemberIdByToken(refreshTokenValue))
+            .thenReturn(Optional.of("1"));
 
         // when
         authService.logout(refreshTokenValue);
 
         // then
-        verify(refreshTokenRepository).findByValue(refreshTokenValue);
-        verify(refreshTokenRepository).delete(refreshToken);
+        verify(refreshTokenRedisRepository).findMemberIdByToken(refreshTokenValue);
+        verify(refreshTokenRedisRepository).delete(refreshTokenValue);
     }
 
     @Test
-    @DisplayName("로그아웃 시 토큰이 DB에 없어도 오류 발생하지 않음")
-    void logout_whenTokenNotFound_shouldNotThrowException() {
+    @DisplayName("로그아웃 시 Redis에 토큰이 없으면 예외 발생")
+    void logout_whenTokenNotFound_shouldThrowException() {
         // given
-        String refreshTokenNotInDB = "not-found-refresh-token";
-        when(refreshTokenRepository.findByValue(refreshTokenNotInDB)).thenReturn(Optional.empty());
+        String nonexistentToken = "nonexistent-token";
+        when(refreshTokenRedisRepository.findMemberIdByToken(nonexistentToken))
+            .thenReturn(Optional.empty());
 
-        // when
-        authService.logout(refreshTokenNotInDB);
+        // when & then
+        assertThatThrownBy(() -> authService.logout(nonexistentToken))
+            .isInstanceOf(CustomException.class)
+            .hasMessage(MemberErrorCode.REFRESH_TOKEN_NOT_FOUND.getMessage());
 
-        // then
-        verify(refreshTokenRepository).findByValue(refreshTokenNotInDB);
-        verify(refreshTokenRepository, never()).delete(any());
+        verify(refreshTokenRedisRepository).findMemberIdByToken(nonexistentToken);
+        verify(refreshTokenRedisRepository, never()).delete(any());
     }
 }
