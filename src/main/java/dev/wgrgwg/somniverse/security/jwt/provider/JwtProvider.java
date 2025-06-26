@@ -76,6 +76,27 @@ public class JwtProvider {
         return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
     }
 
+    public Long getRemainingExpirationMillis(String accessToken) {
+        String token = accessToken;
+
+        if (accessToken.startsWith("Bearer ")) {
+            token = accessToken.substring(7);
+        }
+
+        try {
+            Date expirationDate = Jwts.parser()
+                .verifyWith(jwtProperties.getSecretKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getExpiration();
+
+            return Math.max(expirationDate.getTime() - System.currentTimeMillis(), 0);
+        } catch (Exception e) {
+            return 0L;
+        }
+    }
+
     private Claims getClaims(String token) {
         return Jwts.parser().verifyWith(jwtProperties.getSecretKey()).build()
             .parseSignedClaims(token).getPayload();
