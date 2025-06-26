@@ -137,7 +137,7 @@ class AuthServiceTest {
         // when & then
         assertThatThrownBy(() -> authService.reissue(notFoundToken))
             .isInstanceOf(CustomException.class)
-            .hasMessage(MemberErrorCode.REFRESH_TOKEN_NOT_FOUND.getMessage());
+            .hasMessage(MemberErrorCode.TOKEN_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -167,7 +167,7 @@ class AuthServiceTest {
         // when & then
         assertThatThrownBy(() -> authService.logout(nonexistentToken))
             .isInstanceOf(CustomException.class)
-            .hasMessage(MemberErrorCode.REFRESH_TOKEN_NOT_FOUND.getMessage());
+            .hasMessage(MemberErrorCode.TOKEN_NOT_FOUND.getMessage());
 
         verify(refreshTokenRepository).findMemberIdByToken(nonexistentToken);
         verify(refreshTokenRepository, never()).delete(any());
