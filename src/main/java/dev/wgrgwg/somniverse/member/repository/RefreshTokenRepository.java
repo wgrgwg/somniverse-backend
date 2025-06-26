@@ -1,13 +1,39 @@
 package dev.wgrgwg.somniverse.member.repository;
 
-import dev.wgrgwg.somniverse.member.domain.RefreshToken;
-import java.util.List;
+import dev.wgrgwg.somniverse.global.util.HashUtil;
+import java.time.Duration;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Repository;
 
-public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
+@Repository
+@RequiredArgsConstructor
+public class RefreshTokenRepository {
 
-    Optional<RefreshToken> findByValue(String value);
+    private final StringRedisTemplate redisTemplate;
 
-    List<RefreshToken> findAllByMemberId(Long memberId);
+    @Value("${spring.jwt.refresh-token-expiration-ms}")
+    private Long refreshTokenExpire;
+
+    public void save( String refreshToken, String memberId) {
+        redisTemplate.opsForValue().set(
+            redisKey(refreshToken),
+            memberId,
+            Duration.ofMillis(refreshTokenExpire)
+        );
+    }
+
+    public Optional<String> findMemberIdByToken(String refreshToken) {
+        return Optional.ofNullable(redisTemplate.opsForValue().get(redisKey(refreshToken)));
+    }
+
+    public void delete(String refreshToken) {
+        redisTemplate.delete(redisKey(refreshToken));
+    }
+
+    private String redisKey(String refreshToken) {
+        return "RT:" + HashUtil.sha256(refreshToken);
+    }
 }

@@ -13,7 +13,7 @@ import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.request.LoginRequest;
 import dev.wgrgwg.somniverse.member.dto.response.TokenResponse;
 import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
-import dev.wgrgwg.somniverse.member.repository.RefreshTokenRedisRepository;
+import dev.wgrgwg.somniverse.member.repository.RefreshTokenRepository;
 import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
 import dev.wgrgwg.somniverse.security.userdetails.CustomUserDetails;
 import java.util.Optional;
@@ -36,7 +36,7 @@ class AuthServiceTest {
     @Mock
     private JwtProvider jwtProvider;
     @Mock
-    private RefreshTokenRedisRepository refreshTokenRedisRepository;
+    private RefreshTokenRepository refreshTokenRepository;
     @Mock
     private MemberService memberService;
 
@@ -78,7 +78,7 @@ class AuthServiceTest {
         // then
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtProvider).generateToken(testMember);
-        verify(refreshTokenRedisRepository).save("refresh-token", "1");
+        verify(refreshTokenRepository).save("refresh-token", "1");
         assertThat(result.accessToken()).isEqualTo("access-token");
         assertThat(result.refreshToken()).isEqualTo("refresh-token");
     }
@@ -92,7 +92,7 @@ class AuthServiceTest {
         TokenResponse newTokens = new TokenResponse("new-access-token", newRefreshToken);
 
         when(jwtProvider.validateToken(oldRefreshToken)).thenReturn(true);
-        when(refreshTokenRedisRepository.findMemberIdByToken(oldRefreshToken))
+        when(refreshTokenRepository.findMemberIdByToken(oldRefreshToken))
             .thenReturn(Optional.of("1"));
         when(memberService.findById(1L)).thenReturn(testMember);
         when(jwtProvider.generateToken(testMember)).thenReturn(newTokens);
@@ -102,11 +102,11 @@ class AuthServiceTest {
 
         // then
         verify(jwtProvider).validateToken(oldRefreshToken);
-        verify(refreshTokenRedisRepository).findMemberIdByToken(oldRefreshToken);
+        verify(refreshTokenRepository).findMemberIdByToken(oldRefreshToken);
         verify(memberService).findById(1L);
         verify(jwtProvider).generateToken(testMember);
-        verify(refreshTokenRedisRepository).delete(oldRefreshToken);
-        verify(refreshTokenRedisRepository).save(newRefreshToken, "1");
+        verify(refreshTokenRepository).delete(oldRefreshToken);
+        verify(refreshTokenRepository).save(newRefreshToken, "1");
 
         assertThat(result.accessToken()).isEqualTo("new-access-token");
         assertThat(result.refreshToken()).isEqualTo("new-refresh-token");
@@ -131,7 +131,7 @@ class AuthServiceTest {
         // given
         String notFoundToken = "not-found-refresh-token";
         when(jwtProvider.validateToken(notFoundToken)).thenReturn(true);
-        when(refreshTokenRedisRepository.findMemberIdByToken(notFoundToken)).thenReturn(
+        when(refreshTokenRepository.findMemberIdByToken(notFoundToken)).thenReturn(
             Optional.empty());
 
         // when & then
@@ -145,15 +145,15 @@ class AuthServiceTest {
     void logout_success_shouldDeleteRefreshToken() {
         // given
         String refreshTokenValue = "refresh-token-to-delete";
-        when(refreshTokenRedisRepository.findMemberIdByToken(refreshTokenValue))
+        when(refreshTokenRepository.findMemberIdByToken(refreshTokenValue))
             .thenReturn(Optional.of("1"));
 
         // when
         authService.logout(refreshTokenValue);
 
         // then
-        verify(refreshTokenRedisRepository).findMemberIdByToken(refreshTokenValue);
-        verify(refreshTokenRedisRepository).delete(refreshTokenValue);
+        verify(refreshTokenRepository).findMemberIdByToken(refreshTokenValue);
+        verify(refreshTokenRepository).delete(refreshTokenValue);
     }
 
     @Test
@@ -161,7 +161,7 @@ class AuthServiceTest {
     void logout_whenTokenNotFound_shouldThrowException() {
         // given
         String nonexistentToken = "nonexistent-token";
-        when(refreshTokenRedisRepository.findMemberIdByToken(nonexistentToken))
+        when(refreshTokenRepository.findMemberIdByToken(nonexistentToken))
             .thenReturn(Optional.empty());
 
         // when & then
@@ -169,7 +169,7 @@ class AuthServiceTest {
             .isInstanceOf(CustomException.class)
             .hasMessage(MemberErrorCode.REFRESH_TOKEN_NOT_FOUND.getMessage());
 
-        verify(refreshTokenRedisRepository).findMemberIdByToken(nonexistentToken);
-        verify(refreshTokenRedisRepository, never()).delete(any());
+        verify(refreshTokenRepository).findMemberIdByToken(nonexistentToken);
+        verify(refreshTokenRepository, never()).delete(any());
     }
 }
