@@ -13,11 +13,12 @@ import org.springframework.stereotype.Repository;
 public class RefreshTokenRepository {
 
     private final StringRedisTemplate redisTemplate;
+    public static final String REFRESH_TOKEN_PREFIX = "RT:";
 
     @Value("${spring.jwt.refresh-token-expiration-ms}")
     private Long refreshTokenExpire;
 
-    public void save( String refreshToken, String memberId) {
+    public void save(String refreshToken, String memberId) {
         redisTemplate.opsForValue().set(
             redisKey(refreshToken),
             memberId,
@@ -34,6 +35,6 @@ public class RefreshTokenRepository {
     }
 
     private String redisKey(String refreshToken) {
-        return "RT:" + HashUtil.sha256(refreshToken);
+        return REFRESH_TOKEN_PREFIX + HashUtil.sha256(refreshToken);
     }
 }
