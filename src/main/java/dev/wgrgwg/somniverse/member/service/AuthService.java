@@ -72,6 +72,10 @@ public class AuthService {
 
         refreshTokenRepository.delete(refreshToken);
 
+        if (accessToken.startsWith("Bearer ")) {
+            accessToken = accessToken.substring(7);
+        }
+
         long remainingExpirationMillis = jwtProvider.getRemainingExpirationMillis(accessToken);
         accessTokenBlackListRepository.save(accessToken, remainingExpirationMillis);
     }
