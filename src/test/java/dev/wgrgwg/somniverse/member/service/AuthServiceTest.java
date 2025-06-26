@@ -3,6 +3,7 @@ package dev.wgrgwg.somniverse.member.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,6 +14,7 @@ import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.request.LoginRequest;
 import dev.wgrgwg.somniverse.member.dto.response.TokenResponse;
 import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
+import dev.wgrgwg.somniverse.member.repository.AccessTokenBlackListRepository;
 import dev.wgrgwg.somniverse.member.repository.RefreshTokenRepository;
 import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
 import dev.wgrgwg.somniverse.security.userdetails.CustomUserDetails;
@@ -37,6 +39,8 @@ class AuthServiceTest {
     private JwtProvider jwtProvider;
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
+    @Mock
+    private AccessTokenBlackListRepository accessTokenBlackListRepository;
     @Mock
     private MemberService memberService;
 
@@ -141,35 +145,45 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("로그아웃 성공 시 Redis에서 refresh token 삭제")
-    void logout_success_shouldDeleteRefreshToken() {
+    @DisplayName("로그아웃 성공 시 Redis에서 refresh token 삭제 및 access token 블랙리스트 등록")
+    void logout_success_shouldDeleteRefreshTokenAndAddToBlacklist() {
         // given
+        String accessToken = "access-token-to-blacklist";
         String refreshTokenValue = "refresh-token-to-delete";
+        long remainingMillis = 3600000L;
+
         when(refreshTokenRepository.findMemberIdByToken(refreshTokenValue))
             .thenReturn(Optional.of("1"));
+        when(jwtProvider.getRemainingExpirationMillis(accessToken))
+            .thenReturn(remainingMillis);
 
         // when
-        authService.logout(refreshTokenValue);
+        authService.logout(accessToken, refreshTokenValue);
 
         // then
         verify(refreshTokenRepository).findMemberIdByToken(refreshTokenValue);
         verify(refreshTokenRepository).delete(refreshTokenValue);
+        verify(accessTokenBlackListRepository).save(accessToken, remainingMillis);
     }
 
+
     @Test
-    @DisplayName("로그아웃 시 Redis에 토큰이 없으면 예외 발생")
-    void logout_whenTokenNotFound_shouldThrowException() {
+    @DisplayName("로그아웃 시 refresh token이 Redis에 없으면 예외 발생")
+    void logout_whenRefreshTokenNotFound_shouldThrowException() {
         // given
-        String nonexistentToken = "nonexistent-token";
-        when(refreshTokenRepository.findMemberIdByToken(nonexistentToken))
+        String accessToken = "any-access-token";
+        String refreshToken = "nonexistent-refresh-token";
+
+        when(refreshTokenRepository.findMemberIdByToken(refreshToken))
             .thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> authService.logout(nonexistentToken))
+        assertThatThrownBy(() -> authService.logout(accessToken, refreshToken))
             .isInstanceOf(CustomException.class)
             .hasMessage(MemberErrorCode.TOKEN_NOT_FOUND.getMessage());
 
-        verify(refreshTokenRepository).findMemberIdByToken(nonexistentToken);
+        verify(refreshTokenRepository).findMemberIdByToken(refreshToken);
         verify(refreshTokenRepository, never()).delete(any());
+        verify(accessTokenBlackListRepository, never()).save(any(), anyLong());
     }
 }

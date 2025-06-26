@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -19,6 +20,7 @@ import dev.wgrgwg.somniverse.global.util.RefreshTokenCookieUtil;
 import dev.wgrgwg.somniverse.member.dto.request.LoginRequest;
 import dev.wgrgwg.somniverse.member.dto.response.TokenResponse;
 import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
+import dev.wgrgwg.somniverse.member.repository.AccessTokenBlackListRepository;
 import dev.wgrgwg.somniverse.member.service.AuthService;
 import dev.wgrgwg.somniverse.security.config.SecurityConfig;
 import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
@@ -52,6 +54,9 @@ public class AuthControllerTest {
 
     @MockitoBean
     private RefreshTokenCookieUtil refreshTokenCookieUtil;
+
+    @MockitoBean
+    private AccessTokenBlackListRepository blackListRepository;
 
     @MockitoBean
     private JwtProvider jwtProvider;
@@ -187,24 +192,28 @@ public class AuthControllerTest {
         @DisplayName("로그아웃 성공 시 204 NO CONTENT 반환")
         void logout_success_test() throws Exception {
             // given
+            String accessToken = "Bearer access-token";
             String refreshToken = "refresh-token-to-delete";
             Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-            doNothing().when(authService).logout(refreshToken);
+
+            doNothing().when(authService).logout(accessToken, refreshToken);
 
             // when
             ResultActions resultActions = mockMvc.perform(delete("/api/auth/tokens")
+                .header(HttpHeaders.AUTHORIZATION, accessToken)
                 .cookie(refreshTokenCookie));
 
             // then
             resultActions.andExpect(status().isNoContent());
-            verify(authService, times(1)).logout(refreshToken);
+            verify(authService, times(1)).logout(accessToken, refreshToken);
         }
 
         @Test
         @DisplayName("refreshToken 쿠키가 없을 시 실패, 400 BAD REQUEST 반환")
         void logout_fail_whenRefreshTokenCookieIsMissing_test() throws Exception {
             // when
-            ResultActions resultActions = mockMvc.perform(delete("/api/auth/tokens"));
+            ResultActions resultActions = mockMvc.perform(delete("/api/auth/tokens")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer dummy-access-token"));
 
             // then
             resultActions.andExpect(status().isBadRequest())
@@ -213,6 +222,20 @@ public class AuthControllerTest {
                     .value(CommonErrorCode.MISSING_COOKIE.getMessage()))
                 .andExpect(jsonPath("$.errorCode")
                     .value(CommonErrorCode.MISSING_COOKIE.getCode()));
+        }
+
+        @Test
+        @DisplayName("블랙리스트에 있는 accessToken으로 접근 시 401 반환")
+        void accessToken_inBlackList_shouldReturn401() throws Exception {
+            // given
+            String token = "blacklisted-access-token";
+
+            when(blackListRepository.exists(token)).thenReturn(true);
+
+            // when & then
+            mockMvc.perform(get("/api/test")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isUnauthorized());
         }
     }
 }
