@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -60,8 +61,9 @@ public class AuthController {
 
     @DeleteMapping
     public ResponseEntity<ApiResponseDto<Void>> logout(
+        @RequestHeader("Authorization") String accessToken,
         @CookieValue("refreshToken") String refreshToken) {
-        authService.logout(refreshToken);
+        authService.logout(accessToken, refreshToken);
 
         return ResponseEntity.
             status(HttpStatus.NO_CONTENT)

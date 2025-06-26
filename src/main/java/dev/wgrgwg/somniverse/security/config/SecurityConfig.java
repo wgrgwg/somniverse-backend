@@ -1,7 +1,6 @@
 package dev.wgrgwg.somniverse.security.config;
 
 import dev.wgrgwg.somniverse.security.jwt.filter.JwtAuthenticationFilter;
-import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtProvider jwtProvider;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -43,7 +42,7 @@ public class SecurityConfig {
                 .requestMatchers("/", "/api/auth/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated())
-            .addFilterBefore(new JwtAuthenticationFilter(jwtProvider),
+            .addFilterBefore(jwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

@@ -5,6 +5,7 @@ import dev.wgrgwg.somniverse.member.domain.Member;
 import dev.wgrgwg.somniverse.member.dto.request.LoginRequest;
 import dev.wgrgwg.somniverse.member.dto.response.TokenResponse;
 import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
+import dev.wgrgwg.somniverse.member.repository.AccessTokenBlackListRepository;
 import dev.wgrgwg.somniverse.member.repository.RefreshTokenRepository;
 import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
 import dev.wgrgwg.somniverse.security.userdetails.CustomUserDetails;
@@ -24,6 +25,7 @@ public class AuthService {
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final MemberService memberService;
+    private final AccessTokenBlackListRepository accessTokenBlackListRepository;
 
     @Transactional
     public TokenResponse login(LoginRequest loginRequest) {
@@ -48,7 +50,7 @@ public class AuthService {
         }
 
         String memberId = refreshTokenRepository.findMemberIdByToken(refreshToken)
-            .orElseThrow(() -> new CustomException(MemberErrorCode.REFRESH_TOKEN_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(MemberErrorCode.TOKEN_NOT_FOUND));
 
         Member member = memberService.findById(Long.parseLong(memberId));
 
@@ -61,14 +63,16 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(String refreshToken) {
-        Optional<String> memberIdOpt = refreshTokenRepository.findMemberIdByToken(
-            refreshToken);
+    public void logout(String accessToken, String refreshToken) {
+        Optional<String> memberIdOpt = refreshTokenRepository.findMemberIdByToken(refreshToken);
 
         if (memberIdOpt.isEmpty()) {
-            throw new CustomException(MemberErrorCode.REFRESH_TOKEN_NOT_FOUND);
+            throw new CustomException(MemberErrorCode.TOKEN_NOT_FOUND);
         }
 
         refreshTokenRepository.delete(refreshToken);
+
+        long remainingExpirationMillis = jwtProvider.getRemainingExpirationMillis(accessToken);
+        accessTokenBlackListRepository.save(accessToken, remainingExpirationMillis);
     }
 }
