@@ -33,6 +33,11 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
+
+    private String providerId;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private boolean isDeleted;
