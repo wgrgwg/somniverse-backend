@@ -2,6 +2,7 @@ package dev.wgrgwg.somniverse.member.service;
 
 import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.member.domain.Member;
+import dev.wgrgwg.somniverse.member.domain.Provider;
 import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.request.SignupRequest;
 import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
@@ -23,7 +24,7 @@ public class MemberService {
 
     @Transactional
     public MemberResponse signup(SignupRequest signupRequest) {
-        if (memberRepository.existsByEmail(signupRequest.email())) {
+        if (memberRepository.existsByEmailAndProvider(signupRequest.email(), Provider.LOCAL)) {
             throw new CustomException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
@@ -33,8 +34,12 @@ public class MemberService {
 
         String encodedPassword = passwordEncoder.encode(signupRequest.password());
 
-        Member newMember = Member.builder().username(signupRequest.username())
-            .email(signupRequest.email()).password(encodedPassword).role(Role.USER).build();
+        Member newMember = Member.builder()
+            .username(signupRequest.username())
+            .email(signupRequest.email())
+            .password(encodedPassword)
+            .role(Role.USER)
+            .provider(Provider.LOCAL).build();
 
         Member savedMember = memberRepository.save(newMember);
 
