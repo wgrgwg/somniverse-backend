@@ -1,6 +1,7 @@
 package dev.wgrgwg.somniverse.member.repository;
 
 import dev.wgrgwg.somniverse.member.domain.Member;
+import dev.wgrgwg.somniverse.member.domain.Provider;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -13,4 +14,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Boolean existsByEmail(String email);
 
     Boolean existsByUsername(String username);
+
+    Boolean existsByEmailAndProvider(String email, Provider provider);
+
+    Optional<Member> findByEmailAndProvider(String email, Provider provider);
+
+    Optional<Member> findByProviderAndProviderId(Provider provider, String providerId);
 }
