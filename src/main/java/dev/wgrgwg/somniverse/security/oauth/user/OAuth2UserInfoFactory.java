@@ -1,8 +1,8 @@
 package dev.wgrgwg.somniverse.security.oauth.user;
 
-import dev.wgrgwg.somniverse.global.exception.InternalServerException;
 import dev.wgrgwg.somniverse.member.domain.Provider;
-import dev.wgrgwg.somniverse.security.oauth.errorcode.OAuthErrorCode;
+import dev.wgrgwg.somniverse.security.oauth.exception.OAuthErrorCode;
+import dev.wgrgwg.somniverse.security.oauth.exception.OAuthException;
 import java.util.Map;
 
 public class OAuth2UserInfoFactory {
@@ -14,7 +14,7 @@ public class OAuth2UserInfoFactory {
         return switch (provider) {
             case GOOGLE -> new GoogleOAuth2UserInfo(attributes);
             case NAVER -> new NaverOAuth2UserInfo(attributes);
-            default -> throw new InternalServerException(OAuthErrorCode.PROVIDER_NOT_FOUND);
+            default -> throw new OAuthException(OAuthErrorCode.PROVIDER_NOT_FOUND);
         };
     }
 
