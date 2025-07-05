@@ -1,6 +1,6 @@
 package dev.wgrgwg.somniverse.global.util;
 
-import dev.wgrgwg.somniverse.security.jwt.properties.JwtProperties;
+import dev.wgrgwg.somniverse.config.AppProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
@@ -10,14 +10,14 @@ import org.springframework.stereotype.Component;
 public class RefreshTokenCookieUtil {
 
     private static final String NAME = "refreshToken";
-    private final JwtProperties jwtProperties;
+    private final AppProperties appProperties;
 
     public ResponseCookie createRefreshTokenCookie(String token) {
         return ResponseCookie.from(NAME, token)
             .httpOnly(true)
             .secure(true)
             .path("/")
-            .maxAge(jwtProperties.getRefreshTokenExpirationMs() / 1000)
+            .maxAge(appProperties.getJwt().getRefreshTokenExpirationMs() / 1000)
             .sameSite("Strict")
             .build();
     }

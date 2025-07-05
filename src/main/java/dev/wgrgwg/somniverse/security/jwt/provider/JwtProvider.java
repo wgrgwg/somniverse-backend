@@ -1,9 +1,9 @@
 package dev.wgrgwg.somniverse.security.jwt.provider;
 
+import dev.wgrgwg.somniverse.config.AppProperties;
 import dev.wgrgwg.somniverse.member.domain.Member;
 import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.response.TokenResponse;
-import dev.wgrgwg.somniverse.security.jwt.properties.JwtProperties;
 import dev.wgrgwg.somniverse.security.userdetails.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -22,8 +22,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class JwtProvider {
-
-    private final JwtProperties jwtProperties;
+    
+    private final AppProperties appProperties;
 
     public TokenResponse generateToken(Member member) {
         String subject = member.getId().toString();
@@ -31,10 +31,10 @@ public class JwtProvider {
         String role = member.getRole().name();
 
         String accessToken = createJwt(subject, "access", role,
-            jwtProperties.getAccessTokenExpirationMs());
+            appProperties.getJwt().getAccessTokenExpirationMs());
 
         String refreshToken = createJwt(subject, "refresh", role,
-            jwtProperties.getRefreshTokenExpirationMs());
+            appProperties.getJwt().getRefreshTokenExpirationMs());
 
         return new TokenResponse(accessToken, refreshToken);
     }
@@ -47,7 +47,7 @@ public class JwtProvider {
             .issuedAt(new Date(System.currentTimeMillis()))
             .expiration(
                 new Date(System.currentTimeMillis() + expiredMs))
-            .signWith(jwtProperties.getSecretKey())
+            .signWith(appProperties.getJwt().getSecretKey())
             .compact();
     }
 
@@ -85,7 +85,7 @@ public class JwtProvider {
 
         try {
             Date expirationDate = Jwts.parser()
-                .verifyWith(jwtProperties.getSecretKey())
+                .verifyWith(appProperties.getJwt().getSecretKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
@@ -98,7 +98,7 @@ public class JwtProvider {
     }
 
     private Claims getClaims(String token) {
-        return Jwts.parser().verifyWith(jwtProperties.getSecretKey()).build()
+        return Jwts.parser().verifyWith(appProperties.getJwt().getSecretKey()).build()
             .parseSignedClaims(token).getPayload();
     }
 }
