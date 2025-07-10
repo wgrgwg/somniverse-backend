@@ -1,6 +1,9 @@
 package dev.wgrgwg.somniverse.security.config;
 
 import dev.wgrgwg.somniverse.security.jwt.filter.JwtAuthenticationFilter;
+import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationFailureHandler;
+import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationSuccessHandler;
+import dev.wgrgwg.somniverse.security.oauth.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +24,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oauth2AuthenticationFailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -34,7 +40,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+        OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable).formLogin(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable).sessionManagement(
                 session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -42,6 +49,11 @@ public class SecurityConfig {
                 .requestMatchers("/", "/api/auth/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated())
+            .oauth2Login(oauth2 -> oauth2
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService))
+                .successHandler(oauth2AuthenticationSuccessHandler)
+                .failureHandler(oauth2AuthenticationFailureHandler))
             .addFilterBefore(jwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class);
 
