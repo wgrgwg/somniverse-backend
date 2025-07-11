@@ -7,9 +7,13 @@ import dev.wgrgwg.somniverse.member.dto.response.TokenResponse;
 import dev.wgrgwg.somniverse.security.userdetails.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import jakarta.annotation.PostConstruct;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,8 +26,17 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class JwtProvider {
-    
+
     private final AppProperties appProperties;
+    private SecretKey secretKey;
+
+    @PostConstruct
+    private void init() {
+        this.secretKey = new SecretKeySpec(
+            appProperties.getJwt().getSecret().getBytes(StandardCharsets.UTF_8),
+            Jwts.SIG.HS256.key().build().getAlgorithm()
+        );
+    }
 
     public TokenResponse generateToken(Member member) {
         String subject = member.getId().toString();
@@ -47,7 +60,7 @@ public class JwtProvider {
             .issuedAt(new Date(System.currentTimeMillis()))
             .expiration(
                 new Date(System.currentTimeMillis() + expiredMs))
-            .signWith(appProperties.getJwt().getSecretKey())
+            .signWith(secretKey)
             .compact();
     }
 
@@ -85,7 +98,7 @@ public class JwtProvider {
 
         try {
             Date expirationDate = Jwts.parser()
-                .verifyWith(appProperties.getJwt().getSecretKey())
+                .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
@@ -98,7 +111,7 @@ public class JwtProvider {
     }
 
     private Claims getClaims(String token) {
-        return Jwts.parser().verifyWith(appProperties.getJwt().getSecretKey()).build()
+        return Jwts.parser().verifyWith(secretKey).build()
             .parseSignedClaims(token).getPayload();
     }
 }
