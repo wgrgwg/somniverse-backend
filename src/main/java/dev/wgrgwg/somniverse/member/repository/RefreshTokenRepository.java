@@ -1,10 +1,10 @@
 package dev.wgrgwg.somniverse.member.repository;
 
+import dev.wgrgwg.somniverse.config.AppProperties;
 import dev.wgrgwg.somniverse.global.util.HashUtil;
 import java.time.Duration;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -12,17 +12,16 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class RefreshTokenRepository {
 
-    private final StringRedisTemplate redisTemplate;
     public static final String REFRESH_TOKEN_PREFIX = "RT:";
 
-    @Value("${spring.jwt.refresh-token-expiration-ms}")
-    private Long refreshTokenExpire;
+    private final StringRedisTemplate redisTemplate;
+    private final AppProperties appProperties;
 
     public void save(String refreshToken, String memberId) {
         redisTemplate.opsForValue().set(
             redisKey(refreshToken),
             memberId,
-            Duration.ofMillis(refreshTokenExpire)
+            Duration.ofMillis(appProperties.getJwt().getRefreshTokenExpirationMs())
         );
     }
 
