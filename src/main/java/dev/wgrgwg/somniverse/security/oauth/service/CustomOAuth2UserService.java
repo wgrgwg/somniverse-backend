@@ -2,6 +2,7 @@ package dev.wgrgwg.somniverse.security.oauth.service;
 
 import dev.wgrgwg.somniverse.member.domain.Member;
 import dev.wgrgwg.somniverse.member.domain.Provider;
+import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.repository.MemberRepository;
 import dev.wgrgwg.somniverse.security.oauth.exception.OAuthErrorCode;
 import dev.wgrgwg.somniverse.security.oauth.exception.OAuthException;
@@ -62,6 +63,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         Member newMember = Member.builder()
             .email(oauth2UserInfo.getEmail())
             .username(username)
+            .role(Role.USER)
             .provider(provider)
             .providerId(oauth2UserInfo.getProviderId())
             .build();
