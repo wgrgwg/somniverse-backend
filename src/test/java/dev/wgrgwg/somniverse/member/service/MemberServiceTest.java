@@ -7,8 +7,8 @@ import static org.mockito.Mockito.when;
 import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.member.domain.Member;
 import dev.wgrgwg.somniverse.member.domain.Role;
-import dev.wgrgwg.somniverse.member.dto.MemberResponseDto;
-import dev.wgrgwg.somniverse.member.dto.MemberSignupRequestDto;
+import dev.wgrgwg.somniverse.member.dto.request.SignupRequest;
+import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
 import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
 import dev.wgrgwg.somniverse.member.repository.MemberRepository;
 import org.assertj.core.api.Assertions;
@@ -34,7 +34,7 @@ class MemberServiceTest {
     @DisplayName("회원가입 시 중복된 이메일이면 예외 발생")
     void signup_whenEmailAlreadyExists_shouldThrowException() {
         // given
-        MemberSignupRequestDto dto = new MemberSignupRequestDto("user1", "user@email.com",
+        SignupRequest dto = new SignupRequest("user1", "user@email.com",
             "password");
         when(memberRepository.existsByEmail(dto.email())).thenReturn(true);
 
@@ -48,7 +48,7 @@ class MemberServiceTest {
     @DisplayName("회원가입 시 중복된 사용자명이면 예외 발생")
     void signup_whenUsernameAlreadyExists_shouldThrowException() {
         // given
-        MemberSignupRequestDto dto = new MemberSignupRequestDto("user1", "user@email.com",
+        SignupRequest dto = new SignupRequest("user1", "user@email.com",
             "password");
         when(memberRepository.existsByUsername(dto.username())).thenReturn(true);
 
@@ -62,7 +62,7 @@ class MemberServiceTest {
     @DisplayName("회원가입 성공 시 MemberResponseDto 반환")
     void signup_shouldReturnMemberResponseDto_whenSignupSuccess(){
         // given
-        MemberSignupRequestDto dto = new MemberSignupRequestDto("user1", "user@email.com",
+        SignupRequest dto = new SignupRequest("user1", "user@email.com",
             "password");
         when(memberRepository.existsByEmail(dto.email())).thenReturn(false);
         when(memberRepository.existsByUsername(dto.username())).thenReturn(false);
@@ -79,7 +79,7 @@ class MemberServiceTest {
         when(memberRepository.save(any(Member.class))).thenReturn(savedMember);
 
         // when
-        MemberResponseDto responseDto = memberService.signup(dto);
+        MemberResponse responseDto = memberService.signup(dto);
 
         // then
         verify(memberRepository).save(any(Member.class));

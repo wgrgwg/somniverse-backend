@@ -7,14 +7,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.wgrgwg.somniverse.config.SecurityConfig;
 import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.member.domain.Role;
-import dev.wgrgwg.somniverse.member.dto.MemberResponseDto;
-import dev.wgrgwg.somniverse.member.dto.MemberSignupRequestDto;
+import dev.wgrgwg.somniverse.member.dto.request.SignupRequest;
+import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
 import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
 import dev.wgrgwg.somniverse.member.message.MemberSuccessMessage;
 import dev.wgrgwg.somniverse.member.service.MemberService;
+import dev.wgrgwg.somniverse.security.config.SecurityConfig;
+import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,18 +42,21 @@ class MemberControllerTest {
     @MockitoBean
     private MemberService memberService;
 
-    private MemberSignupRequestDto signupRequestDto;
-    private MemberResponseDto responseDto;
+    @MockitoBean
+    private JwtProvider jwtProvider;
+
+    private SignupRequest signupRequestDto;
+    private MemberResponse responseDto;
 
     @BeforeEach
     void init() {
-        signupRequestDto = new MemberSignupRequestDto(
+        signupRequestDto = new SignupRequest(
             "user01@email.com",
             "password01!",
             "user01"
         );
 
-        responseDto = new MemberResponseDto(
+        responseDto = new MemberResponse(
             1L,
             "user01@email.com",
             "user01",
@@ -72,7 +76,7 @@ class MemberControllerTest {
             when(memberService.signup(signupRequestDto)).thenReturn(responseDto);
 
             // when
-            ResultActions resultActions = mockMvc.perform(post("/api/auth/signup")
+            ResultActions resultActions = mockMvc.perform(post("/api/auth/members")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signupRequestDto)));
 
@@ -95,7 +99,7 @@ class MemberControllerTest {
                 new CustomException(MemberErrorCode.EMAIL_ALREADY_EXISTS));
 
             // when
-            ResultActions resultActions = mockMvc.perform(post("/api/auth/signup")
+            ResultActions resultActions = mockMvc.perform(post("/api/auth/members")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signupRequestDto)));
 
@@ -117,7 +121,7 @@ class MemberControllerTest {
                 new CustomException(MemberErrorCode.USERNAME_ALREADY_EXISTS));
 
             // when
-            ResultActions resultActions = mockMvc.perform(post("/api/auth/signup")
+            ResultActions resultActions = mockMvc.perform(post("/api/auth/members")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signupRequestDto)));
 

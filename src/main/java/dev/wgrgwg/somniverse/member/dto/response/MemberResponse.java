@@ -1,9 +1,9 @@
-package dev.wgrgwg.somniverse.member.dto;
+package dev.wgrgwg.somniverse.member.dto.response;
 
 import dev.wgrgwg.somniverse.member.domain.Member;
 import java.time.LocalDateTime;
 
-public record MemberResponseDto(
+public record MemberResponse(
     Long id,
     String email,
     String username,
@@ -11,8 +11,8 @@ public record MemberResponseDto(
     LocalDateTime createdAt
 ) {
 
-    public static MemberResponseDto fromEntity(Member member) {
-        return new MemberResponseDto(
+    public static MemberResponse fromEntity(Member member) {
+        return new MemberResponse(
             member.getId(),
             member.getEmail(),
             member.getUsername(),
