@@ -1,0 +1,31 @@
+package dev.wgrgwg.somniverse.dream.dto.response;
+
+import dev.wgrgwg.somniverse.dream.domain.Dream;
+import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+public record DreamResponse(
+    Long id,
+    String title,
+    String content,
+    LocalDate dreamDate,
+    boolean isPublic,
+    LocalDateTime createdAt,
+    LocalDateTime updatedAt,
+    MemberResponse author
+) {
+
+    public static DreamResponse fromEntity(Dream dream) {
+        return new DreamResponse(
+            dream.getId(),
+            dream.getTitle(),
+            dream.getContent(),
+            dream.getDreamDate(),
+            dream.isPublic(),
+            dream.getCreatedAt(),
+            dream.getUpdatedAt(),
+            MemberResponse.fromEntity(dream.getMember())
+        );
+    }
+}
