@@ -57,4 +57,16 @@ public class Dream {
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void update(String title, String content, LocalDate dreamDate, boolean isPublic) {
+        this.title = title;
+        this.content = content;
+        this.dreamDate = dreamDate;
+        this.isPublic = isPublic;
+    }
+
+    public void softDelete() {
+        isDeleted = true;
+        deletedAt = LocalDateTime.now();
+    }
 }
