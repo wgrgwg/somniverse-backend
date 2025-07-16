@@ -1,6 +1,7 @@
 package dev.wgrgwg.somniverse.dream.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -8,11 +9,14 @@ import static org.mockito.Mockito.when;
 import dev.wgrgwg.somniverse.dream.domain.Dream;
 import dev.wgrgwg.somniverse.dream.dto.request.DreamCreateRequest;
 import dev.wgrgwg.somniverse.dream.dto.response.DreamResponse;
+import dev.wgrgwg.somniverse.dream.exception.DreamErrorCode;
 import dev.wgrgwg.somniverse.dream.repository.DreamRepository;
+import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.member.domain.Member;
 import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.service.MemberService;
 import java.time.LocalDate;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -65,12 +69,12 @@ class DreamServiceTest {
     }
 
     @Nested
-    @DisplayName("꿈 일기 생성 테스트")
+    @DisplayName("꿈일기 생성 테스트")
     class createDreamTests {
 
         @Test
-        @DisplayName("꿈일기 생성 성공 시 DreamResponse 반환")
-        void createDream_success() {
+        @DisplayName("꿈일기 생성 성공하면 DreamResponse 반환")
+        void createDream_whenWithValidInfo_shouldReturnResponse() {
             // given
             DreamCreateRequest request = new DreamCreateRequest(
                 "테스트 꿈",
@@ -91,5 +95,84 @@ class DreamServiceTest {
             verify(dreamRepository).save(any(Dream.class));
         }
     }
-    
+
+    @Nested
+    @DisplayName("꿈일기 단건 조회 테스트")
+    class getDreamTests {
+
+        @Test
+        @DisplayName("꿈일기 조회 성공하면 DreamResponse 반환")
+        void getMyDream_whenCalledByOwner_shouldReturnResponse() {
+            // given
+            when(dreamRepository.findByIdAndIsDeletedFalse(testDream.getId())).thenReturn(
+                Optional.of(testDream));
+
+            // when
+            DreamResponse response = dreamService.getMyDream(testDream.getId(), testMember.getId());
+
+            // then
+            assertThat(response.id()).isEqualTo(testDream.getId());
+            assertThat(response.author().id()).isEqualTo(testMember.getId());
+        }
+
+        @Test
+        @DisplayName("본인 꿈일기가 아니면 예외 발생")
+        void getMyDream_whenCalledByNotOwner_shouldThrowException() {
+            // given
+            when(dreamRepository.findByIdAndIsDeletedFalse(testDream.getId())).thenReturn(
+                Optional.of(testDream));
+
+            // when & then
+            assertThatThrownBy(
+                () -> dreamService.getMyDream(testDream.getId(), otherMember.getId()))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(DreamErrorCode.DREAM_FORBIDDEN.getMessage());
+        }
+
+        @Test
+        @DisplayName("다른 사용자 공개 꿈일기 조회 성공하면 DreamResponse 반환")
+        void getDreamWithAccessControl_whenForPublicDream_shouldReturnResponse() {
+            // given
+            when(dreamRepository.findByIdAndIsDeletedFalse(testDream.getId())).thenReturn(
+                Optional.of(testDream));
+
+            // when
+            DreamResponse response = dreamService.getDreamWithAccessControl(testDream.getId(),
+                otherMember.getId(), false);
+
+            // then
+            assertThat(response.id()).isEqualTo(testDream.getId());
+        }
+
+        @Test
+        @DisplayName("다른 사용자 비공개 꿈일기 조회하면 예외 발생")
+        void getDreamWithAccessControl_whenForPrivateDreamByNotAdmin_shouldThrowException() {
+            // given
+            when(dreamRepository.findByIdAndIsDeletedFalse(privateTestDream.getId())).thenReturn(
+                Optional.of(privateTestDream));
+
+            // when & then
+            assertThatThrownBy(
+                () -> dreamService.getDreamWithAccessControl(privateTestDream.getId(),
+                    otherMember.getId(), false))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(DreamErrorCode.DREAM_FORBIDDEN.getMessage());
+        }
+
+        @Test
+        @DisplayName("관리자는 비공개 꿈일기 조회 성공하면 DreamResponse 반환")
+        void getDreamWithAccessControl_whenForPrivateDreamByAdmin_shouldReturnResponse() {
+            // given
+            when(dreamRepository.findByIdAndIsDeletedFalse(privateTestDream.getId())).thenReturn(
+                Optional.of(privateTestDream));
+
+            // when
+            DreamResponse response = dreamService.getDreamWithAccessControl(
+                privateTestDream.getId(), otherMember.getId(), true);
+
+            // then
+            assertThat(response.id()).isEqualTo(privateTestDream.getId());
+        }
+    }
+
 }
