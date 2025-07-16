@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import dev.wgrgwg.somniverse.dream.domain.Dream;
 import dev.wgrgwg.somniverse.dream.dto.request.DreamCreateRequest;
+import dev.wgrgwg.somniverse.dream.dto.request.DreamUpdateRequest;
 import dev.wgrgwg.somniverse.dream.dto.response.DreamResponse;
 import dev.wgrgwg.somniverse.dream.exception.DreamErrorCode;
 import dev.wgrgwg.somniverse.dream.repository.DreamRepository;
@@ -175,4 +176,38 @@ class DreamServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("꿈일기 수정 테스트")
+    class UpdateDreamTests {
+
+        @Test
+        @DisplayName("본인의 꿈일기 수정하면 성공 DreamResponse 반환")
+        void updateDream_WhenCalledByOwner_shouldReturnResponse() {
+            // given
+            DreamUpdateRequest request = new DreamUpdateRequest("수정된 제목", "수정된 내용", LocalDate.now().minusDays(1), false);
+            when(dreamRepository.findByIdAndIsDeletedFalse(testDream.getId())).thenReturn(Optional.of(testDream));
+
+            // when
+            DreamResponse response = dreamService.updateDream(testDream.getId(), testMember.getId(), request);
+
+            // then
+            assertThat(response.title()).isEqualTo("수정된 제목");
+            assertThat(response.isPublic()).isFalse();
+        }
+
+        @Test
+        @DisplayName("다른 사람의 꿈일기 수정 시도하면 예외 발생")
+        void updateDream_whenCalledByNotOwner_shouldThrowException() {
+            // given
+            DreamUpdateRequest request = new DreamUpdateRequest("수정된 제목", "수정된 내용", LocalDate.now().minusDays(1), true);
+            when(dreamRepository.findByIdAndIsDeletedFalse(testDream.getId())).thenReturn(Optional.of(testDream));
+
+            // when & then
+            assertThatThrownBy(() -> dreamService.updateDream(testDream.getId(), otherMember.getId(), request))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(DreamErrorCode.DREAM_FORBIDDEN.getMessage());
+        }
+    }
+
+    
 }
