@@ -14,5 +14,7 @@ public interface DreamRepository extends JpaRepository<Dream, Long> {
 
     Page<Dream> findAllByIsPublicTrueAndIsDeletedFalse(Pageable pageable);
 
+    Page<Dream> findAllByIsDeletedFalse(Pageable pageable);
+
     Optional<Dream> findByIdAndIsDeletedFalse(Long id);
 }
