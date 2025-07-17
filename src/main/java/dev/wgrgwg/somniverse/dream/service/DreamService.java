@@ -101,7 +101,7 @@ public class DreamService {
     }
 
     @Transactional
-    DreamResponse updateDream(Long dreamId, Long memberId, DreamUpdateRequest request) {
+    public DreamResponse updateDream(Long dreamId, Long memberId, DreamUpdateRequest request) {
         Dream dream = getDreamOrThrow(dreamId);
         validateOwner(dream, memberId);
 
