@@ -46,7 +46,8 @@ public class DreamService {
     }
 
     @Transactional(readOnly = true)
-    public DreamResponse getDreamWithAccessControl(Long dreamId, Long requesterId, boolean isAdmin) {
+    public DreamResponse getDreamWithAccessControl(Long dreamId, Long requesterId,
+        boolean isAdmin) {
         Dream dream = getDreamOrThrow(dreamId);
 
         boolean isOwner = dream.getMember().getId().equals(requesterId);
@@ -75,7 +76,6 @@ public class DreamService {
             .map(DreamSimpleResponse::fromEntity);
     }
 
-
     @Transactional(readOnly = true)
     public Page<DreamSimpleResponse> getPublicDreams(Pageable pageable) {
         return dreamRepository.findAllByIsPublicTrueAndIsDeletedFalse(pageable)
@@ -89,8 +89,14 @@ public class DreamService {
     }
 
     @Transactional(readOnly = true)
-    public Page<DreamSimpleResponse> getAllDreamsForAdmin(Pageable pageable) {
-        return dreamRepository.findAll(pageable)
+    public Page<DreamSimpleResponse> getAllDreamsForAdmin(Pageable pageable,
+        boolean includeDeleted) {
+
+        if (includeDeleted) {
+            return dreamRepository.findAll(pageable).map(DreamSimpleResponse::fromEntity);
+        }
+
+        return dreamRepository.findAllByIsDeletedFalse(pageable)
             .map(DreamSimpleResponse::fromEntity);
     }
 
