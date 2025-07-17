@@ -405,8 +405,8 @@ class DreamServiceTest {
         }
 
         @Test
-        @DisplayName("삭제된 꿈 포함 전체 조회")
-        void getAllDreamsIncludingDeleted_shouldReturnAllDreams() {
+        @DisplayName("삭제된 꿈일기 포함 전체 조회 성공하면 전체 꿈일기 Page 응답 반환")
+        void getAllDreams_whenIncludingDeleted_shouldReturnAllDreams() {
             // given
             List<Dream> allDreams = List.of(activeDream, deletedDream);
             Page<Dream> dreamsPage = new PageImpl<>(allDreams, pageable, allDreams.size());
@@ -428,8 +428,8 @@ class DreamServiceTest {
         }
 
         @Test
-        @DisplayName("삭제되지 않은 꿈만 조회")
-        void getAllDreamsExcludingDeleted_shouldReturnOnlyNotDeletedDreams() {
+        @DisplayName("삭제되지 않은 꿈일기만 조회 성공하면 삭제되지 않은 꿈일기 Page 응답 반환")
+        void getAllDreams_whenExcludingDeleted_shouldReturnOnlyNotDeletedDreams() {
             // given
             List<Dream> notDeletedDreams = List.of(activeDream);
             Page<Dream> dreamsPage = new PageImpl<>(notDeletedDreams, pageable, notDeletedDreams.size());
