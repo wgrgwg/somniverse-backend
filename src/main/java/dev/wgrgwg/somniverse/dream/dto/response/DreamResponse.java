@@ -4,7 +4,9 @@ import dev.wgrgwg.somniverse.dream.domain.Dream;
 import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import lombok.Builder;
 
+@Builder
 public record DreamResponse(
     Long id,
     String title,
