@@ -24,6 +24,10 @@ import dev.wgrgwg.somniverse.member.repository.AccessTokenBlackListRepository;
 import dev.wgrgwg.somniverse.member.service.AuthService;
 import dev.wgrgwg.somniverse.security.config.SecurityConfig;
 import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
+import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationFailureHandler;
+import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationSuccessHandler;
+import dev.wgrgwg.somniverse.security.oauth.service.CustomOAuth2UserService;
+import dev.wgrgwg.somniverse.security.userdetails.CustomUserDetailsService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -60,6 +64,18 @@ public class AuthControllerTest {
 
     @MockitoBean
     private JwtProvider jwtProvider;
+
+    @MockitoBean
+    private CustomOAuth2UserService customOAuth2UserService;
+
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
+
+    @MockitoBean
+    private OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
+
+    @MockitoBean
+    private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Nested
     @DisplayName("로그인 api 테스트")
