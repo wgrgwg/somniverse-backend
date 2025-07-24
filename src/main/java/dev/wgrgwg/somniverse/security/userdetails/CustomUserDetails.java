@@ -1,6 +1,7 @@
 package dev.wgrgwg.somniverse.security.userdetails;
 
 import dev.wgrgwg.somniverse.member.domain.Member;
+import dev.wgrgwg.somniverse.member.domain.Role;
 import java.util.Collection;
 import java.util.Collections;
 import lombok.Getter;
@@ -48,5 +49,9 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return !member.isDeleted();
+    }
+
+    public boolean isAdmin() {
+        return member.getRole().equals(Role.ADMIN) || member.getRole().equals(Role.MANAGER);
     }
 }
