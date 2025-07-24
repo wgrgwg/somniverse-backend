@@ -504,6 +504,7 @@ class DreamServiceTest {
 
             // then
             verify(dreamRepository).findByIdAndIsDeletedFalse(testDream.getId());
+            assertThat(testDream.isDeleted()).isTrue();
         }
 
         @Test

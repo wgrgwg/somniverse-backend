@@ -15,7 +15,8 @@ public record DreamResponse(
     boolean isPublic,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
-    MemberResponse author
+    MemberResponse author,
+    boolean isDeleted
 ) {
 
     public static DreamResponse fromEntity(Dream dream) {
@@ -27,7 +28,8 @@ public record DreamResponse(
             dream.isPublic(),
             dream.getCreatedAt(),
             dream.getUpdatedAt(),
-            MemberResponse.fromEntity(dream.getMember())
+            MemberResponse.fromEntity(dream.getMember()),
+            dream.isDeleted()
         );
     }
 }
