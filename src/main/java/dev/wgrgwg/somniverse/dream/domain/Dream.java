@@ -1,5 +1,6 @@
 package dev.wgrgwg.somniverse.dream.domain;
 
+import dev.wgrgwg.somniverse.comment.domain.Comment;
 import dev.wgrgwg.somniverse.member.domain.Member;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -8,10 +9,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,6 +41,9 @@ public class Dream {
     private String content;
 
     private LocalDate dreamDate;
+
+    @OneToMany(mappedBy = "dream")
+    private List<Comment> comments = new ArrayList<>();
 
     private boolean isPublic;
 
@@ -67,6 +74,9 @@ public class Dream {
 
     public void softDelete() {
         isDeleted = true;
+        for (Comment comment : comments) {
+            comment.softDelete();
+        }
         deletedAt = LocalDateTime.now();
     }
 }
