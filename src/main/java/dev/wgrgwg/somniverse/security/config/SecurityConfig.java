@@ -46,8 +46,8 @@ public class SecurityConfig {
             .httpBasic(AbstractHttpConfigurer::disable).sessionManagement(
                 session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/api/auth/**").permitAll()
-                .requestMatchers("/error").permitAll()
+                .requestMatchers("/api/dreams/admin/**").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers("/", "/api/auth/**", "/error").permitAll()
                 .anyRequest().authenticated())
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfo -> userInfo
