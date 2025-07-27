@@ -52,7 +52,7 @@ public class AuthService {
         String memberId = refreshTokenRepository.findMemberIdByToken(refreshToken)
             .orElseThrow(() -> new CustomException(MemberErrorCode.TOKEN_NOT_FOUND));
 
-        Member member = memberService.findById(Long.parseLong(memberId));
+        Member member = memberService.getMemberOrThrow(Long.parseLong(memberId));
 
         TokenResponse newTokens = jwtProvider.generateToken(member);
 

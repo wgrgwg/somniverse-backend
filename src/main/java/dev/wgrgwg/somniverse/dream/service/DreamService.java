@@ -26,7 +26,7 @@ public class DreamService {
 
     @Transactional
     public DreamResponse createDream(DreamCreateRequest request, Long memberId) {
-        Member currentMember = memberService.findById(memberId);
+        Member currentMember = memberService.getMemberOrThrow(memberId);
 
         Dream dream = Dream.builder().title(request.title())
             .content(request.content()).dreamDate(request.dreamDate())
@@ -118,7 +118,7 @@ public class DreamService {
         dream.softDelete();
     }
 
-    private Dream getDreamOrThrow(Long dreamId) {
+    public Dream getDreamOrThrow(Long dreamId) {
         return dreamRepository.findByIdAndIsDeletedFalse(dreamId)
             .orElseThrow(() -> new CustomException(DreamErrorCode.DREAM_NOT_FOUND));
     }
