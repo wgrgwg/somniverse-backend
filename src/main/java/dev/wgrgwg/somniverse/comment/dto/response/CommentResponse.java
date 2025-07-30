@@ -1,9 +1,8 @@
 package dev.wgrgwg.somniverse.comment.dto.response;
 
 import dev.wgrgwg.somniverse.comment.domain.Comment;
+import dev.wgrgwg.somniverse.comment.message.CommentMessage;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public record CommentResponse(
     Long id,
@@ -13,10 +12,10 @@ public record CommentResponse(
     LocalDateTime updatedAt,
     boolean isDeleted,
     Long parentId,
-    List<CommentResponse> children
+    Long totalChildrenCount
 ) {
 
-    public static CommentResponse fromEntity(Comment comment) {
+    public static CommentResponse fromEntity(Comment comment, Long totalChildrenCount) {
         Long parentId = null;
         if (comment.getParent() != null) {
             parentId = comment.getParent().getId();
@@ -30,7 +29,25 @@ public record CommentResponse(
             comment.getUpdatedAt(),
             comment.isDeleted(),
             parentId,
-            new ArrayList<>()
+            totalChildrenCount
+        );
+    }
+
+    public static CommentResponse fromDeletedEntity(Comment comment, Long totalChildrenCount) {
+        Long parentId = null;
+        if(comment.getParent() != null) {
+            parentId = comment.getParent().getId();
+        }
+
+        return new CommentResponse(
+            comment.getId(),
+            CommentMessage.DELETED_COMMENT_CONTENT.getMessage(),
+            comment.getMember().getUsername(),
+            comment.getCreatedAt(),
+            comment.getUpdatedAt(),
+            comment.isDeleted(),
+            parentId,
+            totalChildrenCount
         );
     }
 }
