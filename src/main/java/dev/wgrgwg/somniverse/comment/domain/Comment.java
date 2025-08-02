@@ -56,22 +56,22 @@ public class Comment {
     private LocalDateTime deletedAt;
 
     @PrePersist
-    public void onCreate(){
+    public void onCreate() {
         this.isDeleted = false;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
-    public void onUpdate(){
+    public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void update(String content){
+    public void updateContent(String content) {
         this.content = content;
     }
 
-    public void softDelete(){
+    public void softDelete() {
         this.isDeleted = true;
         deletedAt = LocalDateTime.now();
     }
