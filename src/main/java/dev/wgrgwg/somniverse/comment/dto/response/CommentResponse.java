@@ -16,6 +16,19 @@ public record CommentResponse(
 ) {
 
     public static CommentResponse fromEntity(Comment comment, Long totalChildrenCount) {
+        return from(comment, comment.getContent(), totalChildrenCount);
+    }
+
+    public static CommentResponse fromDeletedEntity(Comment comment, Long totalChildrenCount) {
+        return from(comment, CommentMessage.DELETED_COMMENT_CONTENT.getMessage(),
+            totalChildrenCount);
+    }
+
+    public static CommentResponse fromEntityWithoutChildCount(Comment comment) {
+        return from(comment, comment.getContent(), null);
+    }
+
+    public static CommentResponse from(Comment comment, String content, Long totalChildrenCount) {
         Long parentId = null;
         if (comment.getParent() != null) {
             parentId = comment.getParent().getId();
@@ -23,25 +36,7 @@ public record CommentResponse(
 
         return new CommentResponse(
             comment.getId(),
-            comment.getContent(),
-            comment.getMember().getUsername(),
-            comment.getCreatedAt(),
-            comment.getUpdatedAt(),
-            comment.isDeleted(),
-            parentId,
-            totalChildrenCount
-        );
-    }
-
-    public static CommentResponse fromDeletedEntity(Comment comment, Long totalChildrenCount) {
-        Long parentId = null;
-        if(comment.getParent() != null) {
-            parentId = comment.getParent().getId();
-        }
-
-        return new CommentResponse(
-            comment.getId(),
-            CommentMessage.DELETED_COMMENT_CONTENT.getMessage(),
+            content,
             comment.getMember().getUsername(),
             comment.getCreatedAt(),
             comment.getUpdatedAt(),
