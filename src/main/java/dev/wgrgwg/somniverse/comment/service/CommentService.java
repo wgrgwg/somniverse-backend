@@ -2,6 +2,7 @@ package dev.wgrgwg.somniverse.comment.service;
 
 import dev.wgrgwg.somniverse.comment.domain.Comment;
 import dev.wgrgwg.somniverse.comment.dto.request.CommentCreateRequest;
+import dev.wgrgwg.somniverse.comment.dto.request.CommentUpdateRequest;
 import dev.wgrgwg.somniverse.comment.dto.response.CommentResponse;
 import dev.wgrgwg.somniverse.comment.exception.CommentErrorCode;
 import dev.wgrgwg.somniverse.comment.repository.CommentRepository;
@@ -13,6 +14,7 @@ import dev.wgrgwg.somniverse.member.service.MemberService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -44,11 +46,11 @@ public class CommentService {
             .parent(parent)
             .build();
 
-        Comment savedComment = commentRepository.save(comment);
-
         if (parent != null) {
-            savedComment.setParent(parent);
+            comment.setParent(parent);
         }
+
+        Comment savedComment = commentRepository.save(comment);
 
         return CommentResponse.fromEntity(savedComment, 0L);
     }
@@ -78,6 +80,18 @@ public class CommentService {
         Page<Comment> commentsPage = commentRepository.findAllByParentId(parentId, pageable);
 
         return commentsPage.map(comment -> convertToDtoWithAccessControl(comment, isAdmin, 0L));
+    }
+
+    @Transactional
+    public CommentResponse updateComment(Long commentId, CommentUpdateRequest request,
+        Long memberId) {
+        Comment comment = getCommentOrThrow(commentId);
+
+        validateUpdatable(comment, memberId);
+
+        comment.updateContent(request.content());
+
+        return CommentResponse.fromEntityWithoutChildCount(comment);
     }
 
     private Comment resolveParentComment(Long parentId, Long dreamId) {
@@ -128,6 +142,20 @@ public class CommentService {
 
         if (parent.getParent() != null) {
             throw new CustomException(CommentErrorCode.REPLY_TO_REPLY_NOT_ALLOWED);
+        }
+    }
+
+    private void validateUpdatable(Comment comment, Long memberId){
+        if(comment.isDeleted()){
+            throw new CustomException(CommentErrorCode.DELETED_COMMENT_CANNOT_BE_UPDATED);
+        }
+
+        validateOwner(comment, memberId);
+    }
+
+    private void validateOwner(Comment comment, Long memberId) {
+        if (!Objects.equals(comment.getMember().getId(), memberId)) {
+            throw new CustomException(CommentErrorCode.COMMENT_FORBIDDEN);
         }
     }
 }
