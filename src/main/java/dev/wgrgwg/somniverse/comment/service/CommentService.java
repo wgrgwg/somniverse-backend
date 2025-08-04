@@ -94,6 +94,21 @@ public class CommentService {
         return CommentResponse.fromEntityWithoutChildCount(comment);
     }
 
+    @Transactional
+    public void deleteComment(Long commentId, Long memberId) {
+        Comment comment = getCommentOrThrow(commentId);
+        validateOwner(comment, memberId);
+
+        comment.softDelete();
+    }
+
+    @Transactional
+    public void deleteCommentByAdmin(Long commentId) {
+        Comment comment = getCommentOrThrow(commentId);
+
+        comment.softDelete();
+    }
+
     private Comment resolveParentComment(Long parentId, Long dreamId) {
         if (parentId == null) {
             return null;
@@ -145,8 +160,8 @@ public class CommentService {
         }
     }
 
-    private void validateUpdatable(Comment comment, Long memberId){
-        if(comment.isDeleted()){
+    private void validateUpdatable(Comment comment, Long memberId) {
+        if (comment.isDeleted()) {
             throw new CustomException(CommentErrorCode.DELETED_COMMENT_CANNOT_BE_UPDATED);
         }
 
