@@ -85,14 +85,14 @@
 
 ### III. 댓글 기능 - 인증 필요
 
-| 기능        | 메서드    | Endpoint                           | 설명                                                 | 요청 항목 예시                                                     | 응답 코드 및 설명                                                     |
-|-----------|--------|------------------------------------|----------------------------------------------------|--------------------------------------------------------------|----------------------------------------------------------------|
-| 댓글 작성     | POST   | `/api/dreams/{dreamId}/comments`   | 특정 꿈 일기에 댓글 작성                                     | - Path: `dreamId`<br>- Body: `content`                       | `201`: 등록 성공<br>`400`: 유효성 오류<br>`401`: 인증 실패                  |
-| 댓글 목록 조회  | GET    | `/api/dreams/{dreamId}/comments`   | 특정 꿈 일기의 댓글 목록 조회 (페이징 처리)                         | - Path: `dreamId`<br>- Query: `page`, `size`, `sort`         | `200`: 성공                                                      |
-| 댓글 수정     | PUT    | `/api/comments/{commentId}`        | 특정 댓글 수정                                           | - Path: `commentId`<br>- Body: `content`                     | `200`: 성공<br>`400`: 유효성 오류<br>`401`: 인증 실패<br>`403`: 인가 실패     |
-| 댓글 삭제     | DELETE | `/api/comments/{commentId}`        | 특정 댓글 삭제                                           | - Path: `commentId`                                          | `204`: 삭제 성공<br>`401`: 인증 실패<br>`403`: 인가 실패<br>`404`: 존재하지 않음 |
-| 대댓글 작성    | POST   | `/api/comments/{parentId}/replies` | 특정 댓글에 대한 대댓글(답글) 작성                               | - Path: `parentCommentId`<br>- Body: `content`               | `201`: 등록 성공<br>`400`: 유효성 오류<br>`401`: 인증 실패                  |
-| 대댓글 목록 조회 | GET    | `/api/comments/{parentId}/replies` | 특정 댓글의 대댓글(답글) 목록 조회 (기본 몇 개 + '답글 더보기' 형식 페이징 처리) | - Path: `parentCommentId`<br>- Query: `page`, `size`, `sort` | `200`: 성공                                                      |
+| 기능            | 메서드    | Endpoint                             | 설명                      | 요청 항목 예시                                           | 응답 코드 및 설명                                                                      |
+|---------------|--------|--------------------------------------|-------------------------|----------------------------------------------------|---------------------------------------------------------------------------------|
+| 댓글 작성         | POST   | `/api/dreams/{dreamId}/comments`     | 꿈 일기에 댓글 작성             | Path: `dreamId`<br>Body: `content`                 | `201`: 생성 성공<br>`400`: 유효성 오류<br>`401`: 인증 실패<br>`404`: 존재하지 않음                 |
+| 댓글 목록 조회 (부모) | GET    | `/api/dreams/{dreamId}/comments`     | 꿈 일기의 부모 댓글 목록 조회 (페이징) | Path: `dreamId`<br>Query: `page`, `size`, `sort`   | `200`: 조회 성공<br>`401`: 인증 실패<br>`404`: 존재하지 않음                                  |
+| 대댓글 목록 조회     | GET    | `/api/comments/{commentId}/children` | 특정 댓글의 대댓글 목록 조회 (페이징)  | Path: `commentId`<br>Query: `page`, `size`, `sort` | `200`: 조회 성공<br>`401`: 인증 실패<br>`404`: 존재하지 않음                                  |
+| 댓글 수정         | PUT    | `/api/comments/{commentId}`          | 댓글 내용 수정                | Path: `commentId`<br>Body: `content`               | `200`: 수정 성공<br>`400`: 유효성 오류<br>`401`: 인증 실패<br>`403`: 인가 실패<br>`404`: 존재하지 않음 |
+| 댓글 삭제 (사용자)   | DELETE | `/api/comments/{commentId}`          | 댓글 삭제 (본인만 가능)          | Path: `commentId`                                  | `204`: 삭제 성공<br>`401`: 인증 실패<br>`403`: 인가 실패<br>`404`: 존재하지 않음                  |
+| 댓글 삭제 (관리자)   | DELETE | `/api/comments/admin/{commentId}`    | 댓글 삭제 (관리자 전용)          | Path: `commentId`                                  | `204`: 삭제 성공<br>`401`: 인증 실패<br>`403`: 인가 실패<br>`404`: 존재하지 않음                  |
 
 ### IV. AI 부가 기능 - 인증 필요
 
