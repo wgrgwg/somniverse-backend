@@ -1,4 +1,4 @@
-package dev.wgrgwg.somniverse.comment;
+package dev.wgrgwg.somniverse.comment.controller;
 
 import dev.wgrgwg.somniverse.comment.dto.request.CommentCreateRequest;
 import dev.wgrgwg.somniverse.comment.dto.request.CommentUpdateRequest;
