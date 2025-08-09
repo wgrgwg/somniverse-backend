@@ -98,7 +98,7 @@ class AuthServiceTest {
         when(jwtProvider.validateToken(oldRefreshToken)).thenReturn(true);
         when(refreshTokenRepository.findMemberIdByToken(oldRefreshToken))
             .thenReturn(Optional.of("1"));
-        when(memberService.findById(1L)).thenReturn(testMember);
+        when(memberService.getMemberOrThrow(1L)).thenReturn(testMember);
         when(jwtProvider.generateToken(testMember)).thenReturn(newTokens);
 
         // when
@@ -107,7 +107,7 @@ class AuthServiceTest {
         // then
         verify(jwtProvider).validateToken(oldRefreshToken);
         verify(refreshTokenRepository).findMemberIdByToken(oldRefreshToken);
-        verify(memberService).findById(1L);
+        verify(memberService).getMemberOrThrow(1L);
         verify(jwtProvider).generateToken(testMember);
         verify(refreshTokenRepository).delete(oldRefreshToken);
         verify(refreshTokenRepository).save(newRefreshToken, "1");

@@ -1,6 +1,6 @@
-package dev.wgrgwg.somniverse.dream.domain;
+package dev.wgrgwg.somniverse.comment.domain;
 
-import dev.wgrgwg.somniverse.comment.domain.Comment;
+import dev.wgrgwg.somniverse.dream.domain.Dream;
 import dev.wgrgwg.somniverse.member.domain.Member;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,7 +12,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,25 +26,28 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Dream {
+public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String content;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dream_id")
+    private Dream dream;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    private String title;
-    private String content;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Comment parent;
 
-    private LocalDate dreamDate;
-
-    @OneToMany(mappedBy = "dream")
-    private List<Comment> comments = new ArrayList<>();
-
-    private boolean isPublic;
+    @OneToMany(mappedBy = "parent")
+    private List<Comment> children = new ArrayList<>();
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -65,18 +67,17 @@ public class Dream {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void update(String title, String content, LocalDate dreamDate, boolean isPublic) {
-        this.title = title;
+    public void updateContent(String content) {
         this.content = content;
-        this.dreamDate = dreamDate;
-        this.isPublic = isPublic;
     }
 
     public void softDelete() {
-        isDeleted = true;
-        for (Comment comment : comments) {
-            comment.softDelete();
-        }
+        this.isDeleted = true;
         deletedAt = LocalDateTime.now();
+    }
+
+    public void setParent(Comment parent) {
+        this.parent = parent;
+        parent.getChildren().add(this);
     }
 }

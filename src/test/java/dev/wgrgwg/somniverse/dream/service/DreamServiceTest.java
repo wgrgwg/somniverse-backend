@@ -90,7 +90,7 @@ class DreamServiceTest {
                 LocalDate.now(),
                 true
             );
-            when(memberService.findById(testMember.getId())).thenReturn(testMember);
+            when(memberService.getMemberOrThrow(testMember.getId())).thenReturn(testMember);
             when(dreamRepository.save(any(Dream.class))).thenReturn(testDream);
 
             // when
@@ -99,7 +99,7 @@ class DreamServiceTest {
             // then
             assertThat(response).isNotNull();
             assertThat(response.title()).isEqualTo("테스트 꿈");
-            verify(memberService).findById(testMember.getId());
+            verify(memberService).getMemberOrThrow(testMember.getId());
             verify(dreamRepository).save(any(Dream.class));
         }
     }
