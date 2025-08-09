@@ -8,14 +8,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.wgrgwg.somniverse.global.exception.CustomException;
+import dev.wgrgwg.somniverse.global.util.RefreshTokenCookieUtil;
 import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.request.SignupRequest;
 import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
 import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
 import dev.wgrgwg.somniverse.member.message.MemberSuccessMessage;
+import dev.wgrgwg.somniverse.member.repository.AccessTokenBlackListRepository;
 import dev.wgrgwg.somniverse.member.service.MemberService;
 import dev.wgrgwg.somniverse.security.config.SecurityConfig;
 import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
+import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationFailureHandler;
+import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationSuccessHandler;
+import dev.wgrgwg.somniverse.security.oauth.service.CustomOAuth2UserService;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,7 +48,22 @@ class MemberControllerTest {
     private MemberService memberService;
 
     @MockitoBean
+    private RefreshTokenCookieUtil refreshTokenCookieUtil;
+
+    @MockitoBean
+    private AccessTokenBlackListRepository blackListRepository;
+
+    @MockitoBean
     private JwtProvider jwtProvider;
+
+    @MockitoBean
+    private CustomOAuth2UserService customOAuth2UserService;
+
+    @MockitoBean
+    private OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
+
+    @MockitoBean
+    private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     private SignupRequest signupRequestDto;
     private MemberResponse responseDto;
