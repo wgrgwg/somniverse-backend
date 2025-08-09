@@ -39,7 +39,7 @@ public class CommentController {
 
         CommentResponse response = commentService.createComment(dreamId, request, memberId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponseDto.success(response));
     }
 
     @GetMapping("/dreams/{dreamId}/comments")
@@ -86,7 +86,7 @@ public class CommentController {
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-
+    
     @DeleteMapping("/comments/admin/{commentId}")
     public ResponseEntity<ApiResponseDto<Void>> deleteCommentByAdmin(@PathVariable Long commentId,
         @AuthenticationPrincipal CustomUserDetails userDetails) {
