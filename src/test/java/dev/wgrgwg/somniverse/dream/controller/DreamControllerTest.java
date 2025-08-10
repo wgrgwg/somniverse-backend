@@ -168,7 +168,7 @@ class DreamControllerTest {
     class DeleteDreamApiTests {
 
         @Test
-        @DisplayName("꿈일기 삭제 성공 시 204 NO CONTENT 반환")
+        @DisplayName("꿈일기 삭제 성공 시 204 NO CONTENT")
         void deleteDream_success_test() throws Exception {
             // given
             long dreamId = 101L;
@@ -179,6 +179,12 @@ class DreamControllerTest {
 
             // then
             resultActions.andExpect(status().isNoContent());
+        }
+
+        @Test
+        @DisplayName("")
+        void deleteDreamByAdmin_success_test() throws Exception {
+
         }
     }
 
@@ -315,7 +321,8 @@ class DreamControllerTest {
             MemberResponse author = new MemberResponse(1L, "test@email.com", "testuser", "USER",
                 LocalDateTime.now());
             DreamResponse dreamResponse = new DreamResponse(dreamId, "나의 비공개 꿈",
-                "내용", LocalDate.now(), false, LocalDateTime.now(), LocalDateTime.now(), author, false);
+                "내용", LocalDate.now(), false, LocalDateTime.now(), LocalDateTime.now(), author,
+                false);
             when(dreamService.getMyDream(anyLong(), anyLong())).thenReturn(dreamResponse);
 
             // when

@@ -55,7 +55,6 @@ class CommentServiceTest {
 
     private Member testMember;
     private Member otherMember;
-    private Member adminMember;
     private Dream testDream;
     private Comment parentComment;
     private Comment childComment;
@@ -64,7 +63,6 @@ class CommentServiceTest {
     void setUp() {
         testMember = Member.builder().id(1L).username("testuser").role(Role.USER).build();
         otherMember = Member.builder().id(2L).username("otheruser").role(Role.USER).build();
-        adminMember = Member.builder().id(99L).username("admin").role(Role.ADMIN).build();
 
         testDream = Dream.builder().id(101L).member(otherMember).build();
 

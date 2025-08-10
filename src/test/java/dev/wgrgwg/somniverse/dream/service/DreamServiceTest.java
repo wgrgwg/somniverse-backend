@@ -78,7 +78,7 @@ class DreamServiceTest {
 
     @Nested
     @DisplayName("꿈일기 생성 테스트")
-    class createDreamTests {
+    class CreateDreamTests {
 
         @Test
         @DisplayName("꿈일기 생성 성공하면 DreamResponse 반환")
@@ -106,7 +106,7 @@ class DreamServiceTest {
 
     @Nested
     @DisplayName("꿈일기 단건 조회 테스트")
-    class getDreamTests {
+    class GetDreamTests {
 
         @Test
         @DisplayName("꿈일기 조회 성공하면 DreamResponse 반환")
@@ -211,23 +211,27 @@ class DreamServiceTest {
                 .thenReturn(dreamPage);
 
             // when
-            Page<DreamSimpleResponse> resultPage = dreamService.getMyDreams(testMember.getId(), pageable);
+            Page<DreamSimpleResponse> resultPage = dreamService.getMyDreams(testMember.getId(),
+                pageable);
 
             // then
             assertThat(resultPage).isNotNull();
             assertThat(resultPage.getTotalElements()).isEqualTo(2);
             assertThat(resultPage.getContent()).hasSize(2);
             assertThat(resultPage.getContent().get(0).title()).isEqualTo("꿈1");
-            assertThat(resultPage.getContent().get(1).authorUsername()).isEqualTo(testMember.getUsername());
+            assertThat(resultPage.getContent().get(1).authorUsername()).isEqualTo(
+                testMember.getUsername());
 
-            verify(dreamRepository).findAllByMemberIdAndIsDeletedFalse(testMember.getId(), pageable);
+            verify(dreamRepository).findAllByMemberIdAndIsDeletedFalse(testMember.getId(),
+                pageable);
         }
 
         @Test
         @DisplayName("전체 공개 꿈일기 목록 조회 성공 시 Page 응답 반환")
         void getPublicDreams_whenCalled_shouldReturnPagedResponse() {
             // given
-            when(dreamRepository.findAllByIsPublicTrueAndIsDeletedFalse(pageable)).thenReturn(dreamPage);
+            when(dreamRepository.findAllByIsPublicTrueAndIsDeletedFalse(pageable)).thenReturn(
+                dreamPage);
 
             // when
             Page<DreamSimpleResponse> resultPage = dreamService.getPublicDreams(pageable);
@@ -248,7 +252,8 @@ class DreamServiceTest {
                 otherMember.getId(), pageable)).thenReturn(dreamPage);
 
             // when
-            Page<DreamSimpleResponse> resultPage = dreamService.getPublicDreamsByMember(otherMember.getId(), pageable);
+            Page<DreamSimpleResponse> resultPage = dreamService.getPublicDreamsByMember(
+                otherMember.getId(), pageable);
 
             // then
             assertThat(resultPage).isNotNull();
@@ -267,7 +272,8 @@ class DreamServiceTest {
                 .thenReturn(emptyPage);
 
             // when
-            Page<DreamSimpleResponse> resultPage = dreamService.getMyDreams(testMember.getId(), pageable);
+            Page<DreamSimpleResponse> resultPage = dreamService.getMyDreams(testMember.getId(),
+                pageable);
 
             // then
             assertThat(resultPage).isNotNull();
@@ -276,13 +282,14 @@ class DreamServiceTest {
             assertThat(resultPage.isFirst()).isTrue();
             assertThat(resultPage.isLast()).isTrue();
 
-            verify(dreamRepository).findAllByMemberIdAndIsDeletedFalse(testMember.getId(), pageable);
+            verify(dreamRepository).findAllByMemberIdAndIsDeletedFalse(testMember.getId(),
+                pageable);
         }
     }
 
     @Nested
     @DisplayName("공개/비공개 꿈일기 목록 조회 테스트")
-    class VisibilityTests {
+    class DreamsListVisibilityTest {
 
         private Pageable pageable;
         private Member testMember;
@@ -298,7 +305,8 @@ class DreamServiceTest {
             publicDream = Dream.builder().member(testMember).title("공개 꿈").isPublic(true).build();
             ReflectionTestUtils.setField(publicDream, "id", 301L);
 
-            privateDream = Dream.builder().member(testMember).title("비공개 꿈").isPublic(false).build();
+            privateDream = Dream.builder().member(testMember).title("비공개 꿈").isPublic(false)
+                .build();
             ReflectionTestUtils.setField(privateDream, "id", 302L);
         }
 
@@ -313,7 +321,8 @@ class DreamServiceTest {
                 .thenReturn(myDreamsPage);
 
             // when
-            Page<DreamSimpleResponse> resultPage = dreamService.getMyDreams(testMember.getId(), pageable);
+            Page<DreamSimpleResponse> resultPage = dreamService.getMyDreams(testMember.getId(),
+                pageable);
 
             // then
             assertThat(resultPage).isNotNull();
@@ -322,7 +331,8 @@ class DreamServiceTest {
                 .extracting(DreamSimpleResponse::title)
                 .containsExactlyInAnyOrder("공개 꿈", "비공개 꿈");
 
-            verify(dreamRepository).findAllByMemberIdAndIsDeletedFalse(testMember.getId(), pageable);
+            verify(dreamRepository).findAllByMemberIdAndIsDeletedFalse(testMember.getId(),
+                pageable);
         }
 
         @Test
@@ -330,7 +340,8 @@ class DreamServiceTest {
         void getPublicDreams_whenCalled_shouldReturnOnlyPublicDreams() {
             // given
             List<Dream> publicDreamsOnly = List.of(publicDream);
-            Page<Dream> publicDreamsPage = new PageImpl<>(publicDreamsOnly, pageable, publicDreamsOnly.size());
+            Page<Dream> publicDreamsPage = new PageImpl<>(publicDreamsOnly, pageable,
+                publicDreamsOnly.size());
 
             when(dreamRepository.findAllByIsPublicTrueAndIsDeletedFalse(pageable))
                 .thenReturn(publicDreamsPage);
@@ -352,20 +363,24 @@ class DreamServiceTest {
         void getPublicDreamsByMember_whenCalled_shouldReturnOnlyPublicDreamsOfMember() {
             // given
             List<Dream> publicDreamsOnly = List.of(publicDream);
-            Page<Dream> publicDreamsPage = new PageImpl<>(publicDreamsOnly, pageable, publicDreamsOnly.size());
+            Page<Dream> publicDreamsPage = new PageImpl<>(publicDreamsOnly, pageable,
+                publicDreamsOnly.size());
 
-            when(dreamRepository.findAllByMemberIdAndIsDeletedFalseAndIsPublicTrue(testMember.getId(), pageable))
+            when(dreamRepository.findAllByMemberIdAndIsDeletedFalseAndIsPublicTrue(
+                testMember.getId(), pageable))
                 .thenReturn(publicDreamsPage);
 
             // when
-            Page<DreamSimpleResponse> resultPage = dreamService.getPublicDreamsByMember(testMember.getId(), pageable);
+            Page<DreamSimpleResponse> resultPage = dreamService.getPublicDreamsByMember(
+                testMember.getId(), pageable);
 
             // then
             assertThat(resultPage).isNotNull();
             assertThat(resultPage.getTotalElements()).isEqualTo(1);
             assertThat(resultPage.getContent().get(0).title()).isEqualTo("공개 꿈");
 
-            verify(dreamRepository).findAllByMemberIdAndIsDeletedFalseAndIsPublicTrue(testMember.getId(), pageable);
+            verify(dreamRepository).findAllByMemberIdAndIsDeletedFalseAndIsPublicTrue(
+                testMember.getId(), pageable);
         }
     }
 
@@ -432,7 +447,8 @@ class DreamServiceTest {
         void getAllDreams_whenExcludingDeleted_shouldReturnOnlyNotDeletedDreams() {
             // given
             List<Dream> notDeletedDreams = List.of(activeDream);
-            Page<Dream> dreamsPage = new PageImpl<>(notDeletedDreams, pageable, notDeletedDreams.size());
+            Page<Dream> dreamsPage = new PageImpl<>(notDeletedDreams, pageable,
+                notDeletedDreams.size());
 
             when(dreamRepository.findAllByIsDeletedFalse(pageable)).thenReturn(dreamsPage);
 
@@ -534,6 +550,21 @@ class DreamServiceTest {
                 () -> dreamService.deleteDream(nonExistentDreamId, testMember.getId()))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(DreamErrorCode.DREAM_NOT_FOUND.getMessage());
+        }
+
+        @Test
+        @DisplayName("관리자가 관리자 권한으로 댓글 삭제 시 성공")
+        void deleteDreamByAdmin_whenCalledByAdmin_shouldSucceed() {
+            // given
+            when(dreamRepository.findByIdAndIsDeletedFalse(testDream.getId())).thenReturn(
+                Optional.of(testDream));
+
+            // when
+            dreamService.deleteDreamByAdmin(testDream.getId());
+
+            // then
+            assertThat(testDream.isDeleted()).isTrue();
+            verify(dreamRepository).findByIdAndIsDeletedFalse(testDream.getId());
         }
     }
 }
