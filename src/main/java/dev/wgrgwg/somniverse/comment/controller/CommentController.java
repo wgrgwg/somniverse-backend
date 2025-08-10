@@ -90,8 +90,7 @@ public class CommentController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     @DeleteMapping("/comments/admin/{commentId}")
-    public ResponseEntity<ApiResponseDto<Void>> deleteCommentByAdmin(@PathVariable Long commentId,
-        @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<ApiResponseDto<Void>> deleteCommentByAdmin(@PathVariable Long commentId) {
         commentService.deleteCommentByAdmin(commentId);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
