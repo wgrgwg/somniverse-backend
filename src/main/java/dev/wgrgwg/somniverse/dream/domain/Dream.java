@@ -43,6 +43,7 @@ public class Dream {
     private LocalDate dreamDate;
 
     @OneToMany(mappedBy = "dream")
+    @Builder.Default
     private List<Comment> comments = new ArrayList<>();
 
     private boolean isPublic;
