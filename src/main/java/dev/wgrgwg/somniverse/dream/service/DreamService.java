@@ -118,6 +118,13 @@ public class DreamService {
         dream.softDelete();
     }
 
+    @Transactional
+    public void deleteDreamByAdmin(Long dreamId) {
+        Dream dream = getDreamOrThrow(dreamId);
+
+        dream.softDelete();
+    }
+
     public Dream getDreamOrThrow(Long dreamId) {
         return dreamRepository.findByIdAndIsDeletedFalse(dreamId)
             .orElseThrow(() -> new CustomException(DreamErrorCode.DREAM_NOT_FOUND));
