@@ -23,6 +23,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private static final String[] AUTH_WHITELIST = {
+        "/",
+        "/error",
+        "/api/auth/**",
+        "/swagger-ui/**",
+        "/v3/api-docs/**",
+        "/swagger-resources/**"
+    };
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
@@ -48,7 +57,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/dreams/admin/**", "/api/comments/admin/**")
                 .hasAnyAuthority("ADMIN", "MANAGER")
-                .requestMatchers("/", "/api/auth/**", "/error").permitAll()
+                .requestMatchers(AUTH_WHITELIST).permitAll()
                 .anyRequest().authenticated())
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfo -> userInfo
