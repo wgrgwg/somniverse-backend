@@ -47,7 +47,7 @@ public class AdminDreamController {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    @DeleteMapping("/admin/{dreamId}")
+    @DeleteMapping("/{dreamId}")
     public ResponseEntity<ApiResponseDto<Void>> deleteDreamByAdmin(@PathVariable Long dreamId) {
         dreamService.deleteDreamByAdmin(dreamId);
 
