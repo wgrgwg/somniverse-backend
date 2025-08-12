@@ -59,7 +59,7 @@ public class DreamService {
     }
 
     @Transactional(readOnly = true)
-    public DreamResponse getDreamAsAdmin(Long dreamId, boolean includeDeleted) {
+    public DreamResponse getDreamForAdmin(Long dreamId, boolean includeDeleted) {
         Dream dream = dreamRepository.findById(dreamId)
             .orElseThrow(() -> new CustomException(DreamErrorCode.DREAM_NOT_FOUND));
 

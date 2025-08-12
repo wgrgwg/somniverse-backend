@@ -132,13 +132,12 @@ class CommentControllerTest {
                 anyLong())).thenReturn(response);
 
             // when
-            ResultActions resultActions = mockMvc.perform(put("/api/comments/{commentId}", 1L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+            ResultActions resultActions = mockMvc.perform(
+                put("/api/comments/{commentId}", 1L).contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)));
 
             // then
-            resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
+            resultActions.andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.content").value("수정된 댓글"));
         }
 
@@ -148,13 +147,12 @@ class CommentControllerTest {
             // given
             CommentUpdateRequest request = new CommentUpdateRequest("수정된 댓글", null);
             when(commentService.updateComment(anyLong(), any(CommentUpdateRequest.class),
-                anyLong())).thenThrow(
-                new CustomException(CommentErrorCode.COMMENT_FORBIDDEN));
+                anyLong())).thenThrow(new CustomException(CommentErrorCode.COMMENT_FORBIDDEN));
 
             // when
-            ResultActions resultActions = mockMvc.perform(put("/api/comments/{commentId}", 1L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+            ResultActions resultActions = mockMvc.perform(
+                put("/api/comments/{commentId}", 1L).contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)));
 
             // then
             resultActions.andExpect(status().isForbidden());
@@ -183,8 +181,8 @@ class CommentControllerTest {
         @DisplayName("댓글 삭제 실패 시 403 FORBIDDEN, 에러 응답 반환")
         void deleteComment_fail_test() throws Exception {
             // given
-            doThrow(new CustomException(CommentErrorCode.COMMENT_FORBIDDEN))
-                .when(commentService).deleteComment(any(), any());
+            doThrow(new CustomException(CommentErrorCode.COMMENT_FORBIDDEN)).when(commentService)
+                .deleteComment(any(), any());
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -210,13 +208,11 @@ class CommentControllerTest {
                 any(Pageable.class))).thenReturn(page);
 
             // when
-            ResultActions resultActions = mockMvc.perform(get("/api/dreams/{dreamId}/comments", 1L)
-                .param("page", "0")
-                .param("size", "10"));
+            ResultActions resultActions = mockMvc.perform(
+                get("/api/dreams/{dreamId}/comments", 1L).param("page", "0").param("size", "10"));
 
             // then
-            resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+            resultActions.andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
         }
     }
 
@@ -236,35 +232,11 @@ class CommentControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                get("/api/comments/{commentId}/children", 1L)
-                    .param("page", "0")
+                get("/api/comments/{commentId}/children", 1L).param("page", "0")
                     .param("size", "10"));
 
             // then
-            resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
-        }
-    }
-
-    @Nested
-    @DisplayName("관리자 댓글 삭제 API 테스트")
-    class DeleteCommentByAdminApiTests {
-
-        @Test
-        @WithMockCustomUser(role = "ADMIN")
-        @DisplayName("관리자 댓글 삭제 성공 시 204 NO CONTENT")
-        void deleteCommentByAdmin_success_test() throws Exception {
-            // given
-            doNothing().when(commentService).deleteCommentByAdmin(anyLong());
-
-            // when
-            ResultActions resultActions = mockMvc.perform(
-                delete("/api/comments/admin/{commentId}", 1L));
-
-            // then
-            resultActions.andExpect(status().isNoContent());
-
-            verify(commentService, times(1)).deleteCommentByAdmin(anyLong());
+            resultActions.andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
         }
     }
 }

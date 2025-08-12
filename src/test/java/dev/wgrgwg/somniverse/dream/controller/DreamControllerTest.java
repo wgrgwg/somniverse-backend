@@ -180,12 +180,6 @@ class DreamControllerTest {
             // then
             resultActions.andExpect(status().isNoContent());
         }
-
-        @Test
-        @DisplayName("")
-        void deleteDreamByAdmin_success_test() throws Exception {
-
-        }
     }
 
     @Nested
@@ -304,90 +298,13 @@ class DreamControllerTest {
                 responsePage);
 
             // when
-            ResultActions resultActions = mockMvc.perform(get("/api/dreams/my")
+            ResultActions resultActions = mockMvc.perform(get("/api/dreams/me")
                 .param("page", "0").param("size", "10"));
 
             // then
             resultActions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.totalElements").value(2));
-        }
-
-        @Test
-        @DisplayName("내 꿈일기 단건 조회 성공 시 200 OK, 꿈일기 Response 반환")
-        void getMyDream_success_test() throws Exception {
-            // given
-            long dreamId = 102L; // 비공개 꿈이라도 내 것이므로 조회 가능
-            MemberResponse author = new MemberResponse(1L, "test@email.com", "testuser", "USER",
-                LocalDateTime.now());
-            DreamResponse dreamResponse = new DreamResponse(dreamId, "나의 비공개 꿈",
-                "내용", LocalDate.now(), false, LocalDateTime.now(), LocalDateTime.now(), author,
-                false);
-            when(dreamService.getMyDream(anyLong(), anyLong())).thenReturn(dreamResponse);
-
-            // when
-            ResultActions resultActions = mockMvc.perform(get("/api/dreams/my/{dreamId}", dreamId));
-
-            // then
-            resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.id").value(dreamId))
-                .andExpect(jsonPath("$.data.author.id").value(1L));
-        }
-    }
-
-    @Nested
-    @DisplayName("관리자 권한 꿈일기 조회 api 테스트")
-    class GetDreamAsAdminApiTests {
-
-        @Test
-        @WithMockCustomUser(role = "ADMIN")
-        @DisplayName("꿈일기 전체 조회 성공 시 200 OK, Page 정보 반환")
-        void getAllDreams_success_test() throws Exception {
-            // given
-            Pageable pageable = PageRequest.of(0, 10);
-            List<DreamSimpleResponse> content = List.of(
-                new DreamSimpleResponse(1L, "꿈1", LocalDate.now(), LocalDateTime.now(), "user1"),
-                new DreamSimpleResponse(1L, "꿈2", LocalDate.now(), LocalDateTime.now(), "user2"),
-                new DreamSimpleResponse(1L, "삭제된 꿈", LocalDate.now(), LocalDateTime.now(), "user1")
-            );
-
-            Page<DreamSimpleResponse> responsePage = new PageImpl<>(content, pageable, 3);
-            when(dreamService.getAllDreamsForAdmin(any(Pageable.class), anyBoolean())).thenReturn(
-                responsePage);
-
-            // when
-            ResultActions resultActions = mockMvc.perform(get("/api/dreams/admin")
-                .param("page", "0").param("size", "10").param("includeDeleted", "true"));
-
-            // then
-            resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.totalElements").value(3));
-        }
-
-        @Test
-        @WithMockCustomUser(role = "ADMIN")
-        @DisplayName("삭제된 꿈일기 단건 조회 성공 시 200 OK, 꿈일기 정보 반환")
-        void getDeletedDream_success_test() throws Exception {
-            // given
-            long dreamId = 103L; // 삭제된 꿈일기 ID
-            MemberResponse author = new MemberResponse(1L, "test@email.com", "testuser", "USER",
-                LocalDateTime.now());
-            DreamResponse dreamResponse = new DreamResponse(dreamId, "삭제된 꿈", "내용", LocalDate.now(),
-                false, LocalDateTime.now(), LocalDateTime.now(), author, true);
-            when(dreamService.getDreamAsAdmin(anyLong(), anyBoolean())).thenReturn(dreamResponse);
-
-            // when
-            ResultActions resultActions = mockMvc.perform(
-                get("/api/dreams/admin/{dreamId}", dreamId)
-                    .param("includeDeleted", "true"));
-
-            // then
-            resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.id").value(dreamId))
-                .andExpect(jsonPath("$.data.isDeleted").value(true));
         }
     }
 }

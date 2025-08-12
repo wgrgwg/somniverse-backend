@@ -7,13 +7,13 @@ import dev.wgrgwg.somniverse.dream.dto.response.DreamSimpleResponse;
 import dev.wgrgwg.somniverse.dream.service.DreamService;
 import dev.wgrgwg.somniverse.global.dto.ApiResponseDto;
 import dev.wgrgwg.somniverse.security.userdetails.CustomUserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -35,7 +34,7 @@ public class DreamController {
 
     @PostMapping
     public ResponseEntity<ApiResponseDto<DreamResponse>> createDream(
-        @RequestBody DreamCreateRequest request,
+        @Valid @RequestBody DreamCreateRequest request,
         @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMember().getId();
 
@@ -57,7 +56,7 @@ public class DreamController {
 
     @PutMapping("/{dreamId}")
     public ResponseEntity<ApiResponseDto<DreamResponse>> updateDream(@PathVariable Long dreamId,
-        @RequestBody DreamUpdateRequest request,
+        @Valid @RequestBody DreamUpdateRequest request,
         @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMember().getId();
 
@@ -76,37 +75,12 @@ public class DreamController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    @DeleteMapping("/admin/{dreamId}")
-    public ResponseEntity<ApiResponseDto<Void>> deleteDreamByAdmin(@PathVariable Long dreamId) {
-        dreamService.deleteDreamByAdmin(dreamId);
-
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    @GetMapping("/my")
+    @GetMapping("/me")
     public ResponseEntity<ApiResponseDto<Page<DreamSimpleResponse>>> getMyDreams(
         @AuthenticationPrincipal CustomUserDetails userDetails, Pageable pageable) {
         Long memberId = userDetails.getMember().getId();
 
         Page<DreamSimpleResponse> response = dreamService.getMyDreams(memberId, pageable);
-
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
-    }
-
-    @GetMapping("/my/{dreamId}")
-    public ResponseEntity<ApiResponseDto<DreamResponse>> getMyDream(@PathVariable Long dreamId,
-        @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long memberId = userDetails.getMember().getId();
-
-        DreamResponse response = dreamService.getMyDream(dreamId, memberId);
-
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
-    }
-
-    @GetMapping
-    public ResponseEntity<ApiResponseDto<Page<DreamSimpleResponse>>> getDreams(Pageable pageable) {
-        Page<DreamSimpleResponse> response = dreamService.getPublicDreams(pageable);
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
     }
@@ -120,22 +94,9 @@ public class DreamController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    @GetMapping("/admin")
-    public ResponseEntity<ApiResponseDto<Page<DreamSimpleResponse>>> getDreamsForAdmin(
-        Pageable pageable, @RequestParam(defaultValue = "false") Boolean includeDeleted) {
-
-        Page<DreamSimpleResponse> response = dreamService.getAllDreamsForAdmin(pageable,
-            includeDeleted);
-
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
-    }
-
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-    @GetMapping("/admin/{dreamId}")
-    public ResponseEntity<ApiResponseDto<DreamResponse>> getDreamAsAdmin(@PathVariable Long dreamId,
-        @RequestParam(defaultValue = "false") Boolean includeDeleted) {
-        DreamResponse response = dreamService.getDreamAsAdmin(dreamId, includeDeleted);
+    @GetMapping
+    public ResponseEntity<ApiResponseDto<Page<DreamSimpleResponse>>> getDreams(Pageable pageable) {
+        Page<DreamSimpleResponse> response = dreamService.getPublicDreams(pageable);
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
     }
