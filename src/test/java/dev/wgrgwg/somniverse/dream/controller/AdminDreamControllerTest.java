@@ -117,7 +117,7 @@ class AdminDreamControllerTest {
                 LocalDateTime.now());
             DreamResponse dreamResponse = new DreamResponse(dreamId, "삭제된 꿈", "내용", LocalDate.now(),
                 false, LocalDateTime.now(), LocalDateTime.now(), author, true);
-            when(dreamService.getDreamAsAdmin(anyLong(), anyBoolean())).thenReturn(dreamResponse);
+            when(dreamService.getDreamForAdmin(anyLong(), anyBoolean())).thenReturn(dreamResponse);
 
             // when
             ResultActions resultActions = mockMvc.perform(

@@ -41,7 +41,7 @@ public class AdminDreamController {
     @GetMapping("/{dreamId}")
     public ResponseEntity<ApiResponseDto<DreamResponse>> getDreamAsAdmin(@PathVariable Long dreamId,
         @RequestParam(defaultValue = "false") Boolean includeDeleted) {
-        DreamResponse response = dreamService.getDreamAsAdmin(dreamId, includeDeleted);
+        DreamResponse response = dreamService.getDreamForAdmin(dreamId, includeDeleted);
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
     }
