@@ -7,6 +7,7 @@ import dev.wgrgwg.somniverse.dream.dto.response.DreamSimpleResponse;
 import dev.wgrgwg.somniverse.dream.service.DreamService;
 import dev.wgrgwg.somniverse.global.dto.ApiResponseDto;
 import dev.wgrgwg.somniverse.security.userdetails.CustomUserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,7 +34,7 @@ public class DreamController {
 
     @PostMapping
     public ResponseEntity<ApiResponseDto<DreamResponse>> createDream(
-        @RequestBody DreamCreateRequest request,
+        @Valid @RequestBody DreamCreateRequest request,
         @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMember().getId();
 
@@ -55,7 +56,7 @@ public class DreamController {
 
     @PutMapping("/{dreamId}")
     public ResponseEntity<ApiResponseDto<DreamResponse>> updateDream(@PathVariable Long dreamId,
-        @RequestBody DreamUpdateRequest request,
+        @Valid @RequestBody DreamUpdateRequest request,
         @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMember().getId();
 
@@ -74,7 +75,7 @@ public class DreamController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @GetMapping("/my")
+    @GetMapping("/me")
     public ResponseEntity<ApiResponseDto<Page<DreamSimpleResponse>>> getMyDreams(
         @AuthenticationPrincipal CustomUserDetails userDetails, Pageable pageable) {
         Long memberId = userDetails.getMember().getId();
@@ -84,12 +85,11 @@ public class DreamController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
     }
 
-    @GetMapping("/my/{dreamId}")
-    public ResponseEntity<ApiResponseDto<DreamResponse>> getMyDream(@PathVariable Long dreamId,
-        @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long memberId = userDetails.getMember().getId();
-
-        DreamResponse response = dreamService.getMyDream(dreamId, memberId);
+    @GetMapping("/member/{memberId}")
+    public ResponseEntity<ApiResponseDto<Page<DreamSimpleResponse>>> getDreamsByMember(
+        @PathVariable Long memberId, Pageable pageable) {
+        Page<DreamSimpleResponse> response = dreamService.getPublicDreamsByMember(memberId,
+            pageable);
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
     }
@@ -97,15 +97,6 @@ public class DreamController {
     @GetMapping
     public ResponseEntity<ApiResponseDto<Page<DreamSimpleResponse>>> getDreams(Pageable pageable) {
         Page<DreamSimpleResponse> response = dreamService.getPublicDreams(pageable);
-
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
-    }
-
-    @GetMapping("/member/{memberId}")
-    public ResponseEntity<ApiResponseDto<Page<DreamSimpleResponse>>> getDreamsByMember(
-        @PathVariable Long memberId, Pageable pageable) {
-        Page<DreamSimpleResponse> response = dreamService.getPublicDreamsByMember(memberId,
-            pageable);
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
     }
