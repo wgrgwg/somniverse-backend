@@ -5,11 +5,14 @@ import dev.wgrgwg.somniverse.member.domain.Member;
 import dev.wgrgwg.somniverse.member.domain.Provider;
 import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.request.SignupRequest;
+import dev.wgrgwg.somniverse.member.dto.response.MemberAdminResponse;
 import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
 import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
 import dev.wgrgwg.somniverse.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +47,16 @@ public class MemberService {
         Member savedMember = memberRepository.save(newMember);
 
         return MemberResponse.fromEntity(savedMember);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MemberAdminResponse> getAllMembersForAdmin(Pageable pageable, String keyword) {
+        if (keyword == null) {
+            return memberRepository.findAll(pageable).map(MemberAdminResponse::fromEntity);
+        }
+
+        return memberRepository.findByEmailContainingOrUsernameContaining(keyword, keyword,
+            pageable).map(MemberAdminResponse::fromEntity);
     }
 
     public Member getMemberOrThrow(Long id) {
