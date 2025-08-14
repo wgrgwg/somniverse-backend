@@ -4,6 +4,7 @@ import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.member.domain.Member;
 import dev.wgrgwg.somniverse.member.domain.Provider;
 import dev.wgrgwg.somniverse.member.domain.Role;
+import dev.wgrgwg.somniverse.member.dto.request.MemberRoleUpdateRequest;
 import dev.wgrgwg.somniverse.member.dto.request.SignupRequest;
 import dev.wgrgwg.somniverse.member.dto.response.MemberAdminResponse;
 import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
@@ -57,6 +58,16 @@ public class MemberService {
 
         return memberRepository.findByEmailContainingOrUsernameContaining(keyword, keyword,
             pageable).map(MemberAdminResponse::fromEntity);
+    }
+
+    @Transactional
+    public MemberAdminResponse updateMemberRoleByAdmin(Long memberId,
+        MemberRoleUpdateRequest request) {
+        Member member = getMemberOrThrow(memberId);
+
+        member.updateRole(request.role());
+
+        return MemberAdminResponse.fromEntity(member);
     }
 
     public Member getMemberOrThrow(Long id) {
