@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,6 +29,15 @@ public class AdminMemberController {
     public ResponseEntity<ApiResponseDto<Page<MemberAdminResponse>>> getAllMember(Pageable pageable,
         @RequestParam(required = false) String keyword) {
         Page<MemberAdminResponse> response = memberService.getAllMembersForAdmin(pageable, keyword);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @GetMapping("/{memberId}")
+    public ResponseEntity<ApiResponseDto<MemberAdminResponse>> getMember(
+        @PathVariable Long memberId) {
+        MemberAdminResponse response = memberService.getMemberForAdmin(memberId);
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
     }
