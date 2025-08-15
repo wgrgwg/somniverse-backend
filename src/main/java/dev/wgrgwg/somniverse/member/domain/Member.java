@@ -54,4 +54,8 @@ public class Member {
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void updateRole(Role role) {
+        this.role = role;
+    }
 }
