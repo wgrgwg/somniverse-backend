@@ -75,8 +75,6 @@ public class CommentService {
     @Transactional(readOnly = true)
     public Page<CommentResponse> getPagedChildrenCommentsByParent(Long parentId, boolean isAdmin,
         Pageable pageable) {
-        getCommentOrThrow(parentId);
-
         Page<Comment> commentsPage = commentRepository.findAllByParentId(parentId, pageable);
 
         return commentsPage.map(comment -> convertToDtoWithAccessControl(comment, isAdmin, 0L));

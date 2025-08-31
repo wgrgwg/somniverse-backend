@@ -24,6 +24,7 @@ import dev.wgrgwg.somniverse.comment.service.CommentService;
 import dev.wgrgwg.somniverse.dream.service.DreamService;
 import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.global.util.RefreshTokenCookieUtil;
+import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
 import dev.wgrgwg.somniverse.member.repository.AccessTokenBlackListRepository;
 import dev.wgrgwg.somniverse.member.service.AuthService;
 import dev.wgrgwg.somniverse.security.config.SecurityConfig;
@@ -96,7 +97,10 @@ class CommentControllerTest {
         void createComment_success_test() throws Exception {
             // given
             CommentCreateRequest request = new CommentCreateRequest("댓글 내용", null);
-            CommentResponse response = new CommentResponse(1L, "댓글 내용", "작성자", LocalDateTime.now(),
+            MemberResponse memberResponse = new MemberResponse(1L, "user01@email.com", "user01",
+                "작성자", LocalDateTime.now());
+            CommentResponse response = new CommentResponse(1L, "댓글 내용", memberResponse,
+                LocalDateTime.now(),
                 LocalDateTime.now(), false, null, null);
             when(commentService.createComment(anyLong(), any(CommentCreateRequest.class),
                 anyLong())).thenReturn(response);
@@ -126,7 +130,10 @@ class CommentControllerTest {
         void updateComment_success_test() throws Exception {
             // given
             CommentUpdateRequest request = new CommentUpdateRequest("수정된 댓글", null);
-            CommentResponse response = new CommentResponse(1L, "수정된 댓글", "작성자", LocalDateTime.now(),
+            MemberResponse memberResponse = new MemberResponse(1L, "user01@email.com", "user01",
+                "작성자", LocalDateTime.now());
+            CommentResponse response = new CommentResponse(1L, "수정된 댓글", memberResponse,
+                LocalDateTime.now(),
                 LocalDateTime.now(), false, null, null);
             when(commentService.updateComment(anyLong(), any(CommentUpdateRequest.class),
                 anyLong())).thenReturn(response);

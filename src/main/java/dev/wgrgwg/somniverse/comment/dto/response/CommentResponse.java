@@ -2,12 +2,13 @@ package dev.wgrgwg.somniverse.comment.dto.response;
 
 import dev.wgrgwg.somniverse.comment.domain.Comment;
 import dev.wgrgwg.somniverse.comment.message.CommentMessage;
+import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
 import java.time.LocalDateTime;
 
 public record CommentResponse(
     Long id,
     String content,
-    String author,
+    MemberResponse author,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
     boolean isDeleted,
@@ -37,7 +38,7 @@ public record CommentResponse(
         return new CommentResponse(
             comment.getId(),
             content,
-            comment.getMember().getUsername(),
+            MemberResponse.fromEntity(comment.getMember()),
             comment.getCreatedAt(),
             comment.getUpdatedAt(),
             comment.isDeleted(),
