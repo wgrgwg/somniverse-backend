@@ -1,5 +1,6 @@
 package dev.wgrgwg.somniverse.config;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -15,6 +16,8 @@ public class AppProperties {
 
     private final Oauth oauth = new Oauth();
 
+    private final Cors cors = new Cors();
+
     @Getter
     @Setter
     public static class Jwt {
@@ -29,5 +32,12 @@ public class AppProperties {
     public static class Oauth {
 
         private String authorizedRedirectUri;
+    }
+
+    @Getter
+    @Setter
+    public static class Cors {
+
+        private List<String> allowedOrigins;
     }
 }
