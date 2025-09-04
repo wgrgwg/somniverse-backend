@@ -1,12 +1,15 @@
 package dev.wgrgwg.somniverse.member.controller;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.wgrgwg.somniverse.config.AppProperties;
 import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.global.util.RefreshTokenCookieUtil;
 import dev.wgrgwg.somniverse.member.domain.Role;
@@ -21,21 +24,27 @@ import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
 import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationFailureHandler;
 import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationSuccessHandler;
 import dev.wgrgwg.somniverse.security.oauth.service.CustomOAuth2UserService;
+import dev.wgrgwg.somniverse.support.security.WithMockCustomUser;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 @WebMvcTest(controllers = MemberController.class)
 @Import(SecurityConfig.class)
+@ActiveProfiles("test")
+@EnableConfigurationProperties(AppProperties.class)
 class MemberControllerTest {
 
     @Autowired
@@ -64,6 +73,9 @@ class MemberControllerTest {
 
     @MockitoBean
     private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+
+    @MockitoBean
+    private ClientRegistrationRepository clientRegistrationRepository;
 
     private SignupRequest signupRequestDto;
     private MemberResponse responseDto;
@@ -156,5 +168,32 @@ class MemberControllerTest {
                     jsonPath("$.errorCode").value(
                         MemberErrorCode.USERNAME_ALREADY_EXISTS.getCode()));
         }
+    }
+
+    @Nested
+    @DisplayName("내정보 조회 api 테스트")
+    @WithMockCustomUser
+    class GetMyInfoApiTests {
+
+        @Test
+        @DisplayName("내 정보 조회 성공 시 200OK와 MemberResponse 반환")
+        void getMyInfo_success_test() throws Exception {
+            // given
+            when(memberService.getMember(any())).thenReturn(responseDto);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(get("/api/me")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(signupRequestDto)));
+
+            // then
+            resultActions.andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.email").value(responseDto.email()))
+                .andExpect(jsonPath("$.data.username").value(responseDto.username()))
+                .andExpect(jsonPath("$.data.role").value(Role.USER.toString()));
+        }
+
     }
 }

@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.wgrgwg.somniverse.config.AppProperties;
 import dev.wgrgwg.somniverse.dream.dto.request.DreamCreateRequest;
 import dev.wgrgwg.somniverse.dream.dto.request.DreamUpdateRequest;
 import dev.wgrgwg.somniverse.dream.dto.response.DreamResponse;
@@ -40,6 +41,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
@@ -47,12 +49,16 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 @WebMvcTest(controllers = DreamController.class)
 @Import(SecurityConfig.class)
+@ActiveProfiles("test")
+@EnableConfigurationProperties(AppProperties.class)
 class DreamControllerTest {
 
     @Autowired
@@ -84,6 +90,9 @@ class DreamControllerTest {
 
     @MockitoBean
     private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+
+    @MockitoBean
+    private ClientRegistrationRepository clientRegistrationRepository;
 
     @Nested
     @DisplayName("꿈일기 생성 api 테스트")

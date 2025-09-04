@@ -103,6 +103,33 @@ class MemberServiceTest {
     }
 
     @Nested
+    @DisplayName("Member 조회 테스트")
+    class MemberGetTest {
+
+        private Member testMember;
+
+        @BeforeEach
+        void setup() {
+            testMember = Member.builder().id(1L).username("testuser").email("test@email.com")
+                .role(Role.USER).build();
+        }
+
+        @Test
+        @DisplayName("회원 조회 성공 시 MemberResponseDto 반환")
+        void getMember_shouldReturnMemberResponseDto_whenGetMemberSuccess() {
+            // given
+            when(memberRepository.findById(testMember.getId())).thenReturn(Optional.of(testMember));
+
+            // when
+            MemberResponse response = memberService.getMember(testMember.getId());
+
+            // then
+            assertThat(response).isNotNull();
+            assertThat(response.id()).isEqualTo(testMember.getId());
+        }
+    }
+
+    @Nested
     @DisplayName("관리자 기능 테스트")
     class AdminFunctionTests {
 

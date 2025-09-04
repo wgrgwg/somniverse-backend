@@ -5,25 +5,28 @@ import dev.wgrgwg.somniverse.member.dto.request.SignupRequest;
 import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
 import dev.wgrgwg.somniverse.member.message.MemberSuccessMessage;
 import dev.wgrgwg.somniverse.member.service.MemberService;
+import dev.wgrgwg.somniverse.security.userdetails.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
 public class MemberController {
 
     private final MemberService memberService;
 
-    @PostMapping("/members")
+    @PostMapping("/auth/members")
     public ResponseEntity<ApiResponseDto<MemberResponse>> signup(@Valid @RequestBody
     SignupRequest signupRequest) {
         MemberResponse memberResponse = memberService.signup(signupRequest);
@@ -32,5 +35,15 @@ public class MemberController {
             .status(HttpStatus.CREATED)
             .body(ApiResponseDto.success(MemberSuccessMessage.SIGNUP_SUCCESS.getMessage(),
                 memberResponse));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponseDto<MemberResponse>> getMember(@AuthenticationPrincipal
+    CustomUserDetails userDetails) {
+        Long memberId = userDetails.getMember().getId();
+
+        MemberResponse response = memberService.getMember(memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
     }
 }

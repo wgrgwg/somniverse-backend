@@ -77,6 +77,11 @@ public class MemberService {
         return MemberAdminResponse.fromEntity(member);
     }
 
+    @Transactional(readOnly = true)
+    public MemberResponse getMember(Long memberId) {
+        return MemberResponse.fromEntity(getMemberOrThrow(memberId));
+    }
+
     public Member getMemberOrThrow(Long id) {
         return memberRepository.findById(id)
             .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
