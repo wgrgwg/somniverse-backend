@@ -97,7 +97,7 @@ class CommentServiceTest {
             // then
             assertThat(response).isNotNull();
             assertThat(response.content()).isEqualTo("새 댓글");
-            assertThat(response.author()).isEqualTo(testMember.getUsername());
+            assertThat(response.author().username()).isEqualTo(testMember.getUsername());
             assertThat(response.parentId()).isNull();
             verify(commentRepository).save(any(Comment.class));
         }
@@ -283,8 +283,6 @@ class CommentServiceTest {
         void getPagedChildrenComments_whenWithValidParent_shouldReturnPagedResponse() {
             // given
             Page<Comment> childrenPage = new PageImpl<>(List.of(childComment), pageable, 1);
-            when(commentRepository.findByIdAndIsDeletedFalse(parentComment.getId())).thenReturn(
-                Optional.of(parentComment));
             when(commentRepository.findAllByParentId(parentComment.getId(), pageable)).thenReturn(
                 childrenPage);
 
