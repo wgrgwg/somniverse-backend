@@ -1,6 +1,7 @@
 package dev.wgrgwg.somniverse.member.controller;
 
 import dev.wgrgwg.somniverse.global.dto.ApiResponseDto;
+import dev.wgrgwg.somniverse.member.dto.request.MemberUsernameUpdateRequest;
 import dev.wgrgwg.somniverse.member.dto.request.SignupRequest;
 import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
 import dev.wgrgwg.somniverse.member.message.MemberSuccessMessage;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,22 +29,32 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/auth/members")
-    public ResponseEntity<ApiResponseDto<MemberResponse>> signup(@Valid @RequestBody
-    SignupRequest signupRequest) {
+    public ResponseEntity<ApiResponseDto<MemberResponse>> signup(
+        @Valid @RequestBody SignupRequest signupRequest) {
         MemberResponse memberResponse = memberService.signup(signupRequest);
 
-        return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(ApiResponseDto.success(MemberSuccessMessage.SIGNUP_SUCCESS.getMessage(),
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            ApiResponseDto.success(MemberSuccessMessage.SIGNUP_SUCCESS.getMessage(),
                 memberResponse));
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<ApiResponseDto<MemberResponse>> getMember(@AuthenticationPrincipal
-    CustomUserDetails userDetails) {
+    @GetMapping("/members/me")
+    public ResponseEntity<ApiResponseDto<MemberResponse>> getMyInfo(
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMember().getId();
 
         MemberResponse response = memberService.getMember(memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
+    }
+
+    @PatchMapping("/members/me")
+    public ResponseEntity<ApiResponseDto<MemberResponse>> updateMemberUsername(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @Valid @RequestBody MemberUsernameUpdateRequest request) {
+        Long memberId = userDetails.getMember().getId();
+
+        MemberResponse response = memberService.updateMemberUsername(memberId, request);
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseDto.success(response));
     }
