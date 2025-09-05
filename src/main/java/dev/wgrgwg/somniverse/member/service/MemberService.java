@@ -5,6 +5,7 @@ import dev.wgrgwg.somniverse.member.domain.Member;
 import dev.wgrgwg.somniverse.member.domain.Provider;
 import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.request.MemberRoleUpdateRequest;
+import dev.wgrgwg.somniverse.member.dto.request.MemberUsernameUpdateRequest;
 import dev.wgrgwg.somniverse.member.dto.request.SignupRequest;
 import dev.wgrgwg.somniverse.member.dto.response.MemberAdminResponse;
 import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
@@ -38,11 +39,8 @@ public class MemberService {
 
         String encodedPassword = passwordEncoder.encode(signupRequest.password());
 
-        Member newMember = Member.builder()
-            .username(signupRequest.username())
-            .email(signupRequest.email())
-            .password(encodedPassword)
-            .role(Role.USER)
+        Member newMember = Member.builder().username(signupRequest.username())
+            .email(signupRequest.email()).password(encodedPassword).role(Role.USER)
             .provider(Provider.LOCAL).build();
 
         Member savedMember = memberRepository.save(newMember);
@@ -68,6 +66,19 @@ public class MemberService {
         member.updateRole(request.role());
 
         return MemberAdminResponse.fromEntity(member);
+    }
+
+    @Transactional
+    public MemberResponse updateMemberUsername(Long memberId, MemberUsernameUpdateRequest request) {
+        Member member = getMemberOrThrow(memberId);
+
+        if (memberRepository.existsByUsername(request.username())) {
+            throw new CustomException(MemberErrorCode.USERNAME_ALREADY_EXISTS);
+        }
+
+        member.updateUsername(request.username());
+
+        return MemberResponse.fromEntity(member);
     }
 
     @Transactional(readOnly = true)

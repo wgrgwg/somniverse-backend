@@ -14,6 +14,7 @@ import dev.wgrgwg.somniverse.member.domain.Member;
 import dev.wgrgwg.somniverse.member.domain.Provider;
 import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.request.MemberRoleUpdateRequest;
+import dev.wgrgwg.somniverse.member.dto.request.MemberUsernameUpdateRequest;
 import dev.wgrgwg.somniverse.member.dto.request.SignupRequest;
 import dev.wgrgwg.somniverse.member.dto.response.MemberAdminResponse;
 import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
@@ -126,6 +127,36 @@ class MemberServiceTest {
             // then
             assertThat(response).isNotNull();
             assertThat(response.id()).isEqualTo(testMember.getId());
+        }
+    }
+
+    @Nested
+    @DisplayName("Member 수정 테스트")
+    class UpdateMemberTest {
+
+        private Member testMember;
+
+        @BeforeEach
+        void setup() {
+            testMember = Member.builder().id(1L).username("testuser").email("test@email.com")
+                .role(Role.USER).build();
+        }
+
+        @Test
+        @DisplayName("회원 사용자명 변경 성공 시 MemberResponseDto 반환")
+        void updateMemberUsername_shouldReturnMemberResponseDto_whenUpdateMemberUsernameSuccess() {
+            // given
+            MemberUsernameUpdateRequest request = new MemberUsernameUpdateRequest("새 사용자명");
+            when(memberRepository.findById(testMember.getId())).thenReturn(Optional.of(testMember));
+            when(memberRepository.existsByUsername(request.username())).thenReturn(false);
+
+            // when
+            MemberResponse response = memberService.updateMemberUsername(testMember.getId(),
+                request);
+
+            // then
+            assertThat(response).isNotNull();
+            assertThat(response.username()).isEqualTo("새 사용자명");
         }
     }
 
