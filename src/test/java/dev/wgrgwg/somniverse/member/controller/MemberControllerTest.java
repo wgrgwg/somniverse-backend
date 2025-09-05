@@ -3,6 +3,7 @@ package dev.wgrgwg.somniverse.member.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -13,6 +14,7 @@ import dev.wgrgwg.somniverse.config.AppProperties;
 import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.global.util.RefreshTokenCookieUtil;
 import dev.wgrgwg.somniverse.member.domain.Role;
+import dev.wgrgwg.somniverse.member.dto.request.MemberUsernameUpdateRequest;
 import dev.wgrgwg.somniverse.member.dto.request.SignupRequest;
 import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
 import dev.wgrgwg.somniverse.member.exception.MemberErrorCode;
@@ -176,13 +178,13 @@ class MemberControllerTest {
     class GetMyInfoApiTests {
 
         @Test
-        @DisplayName("내 정보 조회 성공 시 200OK와 MemberResponse 반환")
+        @DisplayName("내 정보 조회 성공 시 200 OK와 MemberResponse 반환")
         void getMyInfo_success_test() throws Exception {
             // given
             when(memberService.getMember(any())).thenReturn(responseDto);
 
             // when
-            ResultActions resultActions = mockMvc.perform(get("/api/me")
+            ResultActions resultActions = mockMvc.perform(get("/api/members/me")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signupRequestDto)));
 
@@ -193,6 +195,32 @@ class MemberControllerTest {
                 .andExpect(jsonPath("$.data.email").value(responseDto.email()))
                 .andExpect(jsonPath("$.data.username").value(responseDto.username()))
                 .andExpect(jsonPath("$.data.role").value(Role.USER.toString()));
+        }
+
+    }
+
+    @Nested
+    @DisplayName("회원 정보 수정 api 테스트")
+    @WithMockCustomUser
+    class UpdateMemberApiTests {
+
+        @Test
+        @DisplayName("내 사용자명 변경 성공 시 200 OK와 MemberResponse 반환")
+        void updateMemberUsername_success_test() throws Exception {
+            // given
+            when(memberService.updateMemberUsername(any(), any())).thenReturn(responseDto);
+            MemberUsernameUpdateRequest request = new MemberUsernameUpdateRequest("user01");
+
+            // when
+            ResultActions resultActions = mockMvc.perform(patch("/api/members/me")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+
+            // then
+            resultActions.andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.username").value(responseDto.username()));
         }
 
     }
