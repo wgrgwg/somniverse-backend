@@ -18,7 +18,7 @@ public class RefreshTokenCookieUtil {
             .secure(true)
             .path("/")
             .maxAge(appProperties.getJwt().getRefreshTokenExpirationMs() / 1000)
-            .sameSite("Strict")
+            .sameSite("None")
             .build();
     }
 }
