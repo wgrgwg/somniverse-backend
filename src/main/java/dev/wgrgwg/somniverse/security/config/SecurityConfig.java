@@ -34,7 +34,8 @@ public class SecurityConfig {
         "/api/auth/**",
         "/swagger-ui/**",
         "/v3/api-docs/**",
-        "/swagger-resources/**"
+        "/swagger-resources/**",
+        "/actuator/health"
     };
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
