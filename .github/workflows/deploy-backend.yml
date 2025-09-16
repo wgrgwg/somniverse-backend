@@ -1,0 +1,113 @@
+name: Deploy Backend (prod)
+
+on:
+  workflow_dispatch: { }
+  push:
+    branches: [ main ]
+    paths:
+      - '**/*.java'
+      - 'pom.xml'
+      - 'build.gradle*'
+      - 'settings.gradle*'
+      - 'gradle/**'
+      - 'src/**'
+
+concurrency:
+  group: somniverse-prod-backend
+  cancel-in-progress: false
+
+env:
+  REMOTE_HOST: ${{ secrets.DEPLOY_HOST }}
+  REMOTE_USER: ${{ secrets.DEPLOY_USER }}
+  REMOTE_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+  REMOTE_DIR: /srv/somniverse
+  HEALTH_LOCAL: http://127.0.0.1:8080/actuator/health
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://somniverse.kro.kr
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Make gradlew executable (if present)
+        run: |
+          if [ -f ./gradlew ]; then chmod +x ./gradlew; fi
+
+      - name: Build with Gradle (if gradle project)
+        if: hashFiles('gradlew') != ''
+        run: |
+          ./gradlew -x test clean bootJar
+          echo "JAR_PATH=$(ls -1 build/libs/*.jar | head -n1)" >> $GITHUB_ENV
+
+      - name: Build with Maven (if maven project)
+        if: hashFiles('pom.xml') != ''
+        run: |
+          ./mvnw -DskipTests -q -B clean package || mvn -DskipTests -q -B clean package
+          echo "JAR_PATH=$(ls -1 target/*.jar | head -n1)" >> $GITHUB_ENV
+
+      - name: Normalize artifact name
+        run: |
+          mkdir -p out
+          cp "$JAR_PATH" out/app.jar
+          ls -lh out/app.jar
+
+      - name: Prepare SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${{ env.REMOTE_PORT || 22 }}" -H "${{ env.REMOTE_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Upload JAR to server
+        run: |
+          scp -P "${{ env.REMOTE_PORT || 22 }}" out/app.jar \
+            "${{ env.REMOTE_USER }}"@"${{ env.REMOTE_HOST }}":"${{ env.REMOTE_DIR }}/backend/app.jar.new"
+
+      - name: Swap JAR, restart, health check (on server)
+        run: |
+          ssh -p "${{ env.REMOTE_PORT || 22 }}" "${{ env.REMOTE_USER }}"@"${{ env.REMOTE_HOST }}" << 'EOF'
+          set -euo pipefail
+          cd /srv/somniverse/backend
+          ts=$(date +%Y%m%d%H%M%S)
+
+          if [ -f app.jar ]; then cp -f app.jar "app.jar.$ts"; fi
+
+          mv -f app.jar.new app.jar
+
+          cd /srv/somniverse
+          docker compose restart backend
+
+          ok=0
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8080/actuator/health | grep -q '"status":"UP"'; then
+              ok=1; break
+            fi
+            sleep 2
+          done
+
+          if [ "$ok" -ne 1 ]; then
+            echo "Health check failed. Rolling back..."
+            cd /srv/somniverse/backend
+            last="$(ls -1t app.jar.* | head -n1 || true)"
+            if [ -n "$last" ]; then
+              mv -f "$last" app.jar
+              cd /srv/somniverse && docker compose restart backend || true
+            fi
+            exit 1
+          fi
+          EOF
+
+      - name: Smoke test over HTTPS
+        run: |
+          curl -fsS https://somniverse.kro.kr/actuator/health | grep -q '"status":"UP"'
