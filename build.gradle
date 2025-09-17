@@ -4,6 +4,8 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
+def profile = System.getProperty('spring.profiles.active', 'local')
+
 group = 'dev.wgrgwg'
 version = '0.0.1-SNAPSHOT'
 
@@ -28,12 +30,41 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
+
+    testRuntimeOnly("com.h2database:h2")
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = ["src/main/resources", "src/main/resources-${profile}"]
+        }
+    }
+}
+
+bootJar {
+    manifest {
+        attributes 'Spring-Boot-Profiles': profile
+    }
 }
 
 tasks.named('test') {
