@@ -48,7 +48,7 @@ jobs:
         if: hashFiles('gradlew') != ''
         run: |
           ./gradlew -x test clean bootJar
-          echo "JAR_PATH=$(ls -1 build/libs/*.jar | head -n1)" >> $GITHUB_ENV
+          echo "JAR_PATH=$(ls -1 build/libs/*[!-plain].jar | head -n1)" >> $GITHUB_ENV
 
       - name: Build with Maven (if maven project)
         if: hashFiles('pom.xml') != ''
@@ -87,13 +87,16 @@ jobs:
 
           cd /srv/somniverse
           docker compose restart backend
+          
+          echo "Waiting 60 seconds for app to initialize..."
+          sleep 60
 
           ok=0
           for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:8080/actuator/health | grep -q '"status":"UP"'; then
               ok=1; break
             fi
-            sleep 2
+            sleep 15
           done
 
           if [ "$ok" -ne 1 ]; then
