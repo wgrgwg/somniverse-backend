@@ -37,4 +37,4 @@ out/
 .vscode/
 
 ### Custom ###
-src/main/**/application-*.yml
+src/main/**/application-local.yml
