@@ -47,7 +47,7 @@ jobs:
       - name: Build with Gradle (if gradle project)
         if: hashFiles('gradlew') != ''
         run: |
-          ./gradlew -x test clean bootJar
+          ./gradlew -x test clean bootJar "-Dspring.profiles.active=prod"
           echo "JAR_PATH=$(ls -1 build/libs/*[!-plain].jar | head -n1)" >> $GITHUB_ENV
 
       - name: Build with Maven (if maven project)
