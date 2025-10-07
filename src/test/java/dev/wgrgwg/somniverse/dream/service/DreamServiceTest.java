@@ -7,6 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import dev.wgrgwg.somniverse.comment.repository.CommentRepository;
 import dev.wgrgwg.somniverse.dream.domain.Dream;
 import dev.wgrgwg.somniverse.dream.dto.request.DreamCreateRequest;
 import dev.wgrgwg.somniverse.dream.dto.request.DreamUpdateRequest;
@@ -40,6 +41,9 @@ class DreamServiceTest {
 
     @Mock
     private DreamRepository dreamRepository;
+
+    @Mock
+    private CommentRepository commentRepository;
 
     @Mock
     private MemberService memberService;
@@ -426,7 +430,7 @@ class DreamServiceTest {
             List<Dream> allDreams = List.of(activeDream, deletedDream);
             Page<Dream> dreamsPage = new PageImpl<>(allDreams, pageable, allDreams.size());
 
-            when(dreamRepository.findAll(pageable)).thenReturn(dreamsPage);
+            when(dreamRepository.findAllForAdmin(pageable)).thenReturn(dreamsPage);
 
             // when
             Page<DreamSimpleResponse> result = dreamService.getAllDreamsForAdmin(pageable, true);
@@ -438,7 +442,7 @@ class DreamServiceTest {
                 .extracting(DreamSimpleResponse::title)
                 .containsExactlyInAnyOrder("삭제되지 않은 꿈", "삭제된 꿈");
 
-            verify(dreamRepository).findAll(pageable);
+            verify(dreamRepository).findAllForAdmin(pageable);
             verify(dreamRepository, never()).findAllByIsDeletedFalse(any());
         }
 
