@@ -75,9 +75,6 @@ public class Dream {
 
     public void softDelete() {
         isDeleted = true;
-        for (Comment comment : comments) {
-            comment.softDelete();
-        }
         deletedAt = LocalDateTime.now();
     }
 }
