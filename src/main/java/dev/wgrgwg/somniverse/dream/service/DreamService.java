@@ -95,7 +95,7 @@ public class DreamService {
         boolean includeDeleted) {
 
         if (includeDeleted) {
-            return dreamRepository.findAll(pageable).map(DreamSimpleResponse::fromEntity);
+            return dreamRepository.findAllForAdmin(pageable).map(DreamSimpleResponse::fromEntity);
         }
 
         return dreamRepository.findAllByIsDeletedFalse(pageable)
