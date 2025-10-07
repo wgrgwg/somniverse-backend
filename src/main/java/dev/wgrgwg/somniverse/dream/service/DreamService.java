@@ -1,5 +1,6 @@
 package dev.wgrgwg.somniverse.dream.service;
 
+import dev.wgrgwg.somniverse.comment.repository.CommentRepository;
 import dev.wgrgwg.somniverse.dream.domain.Dream;
 import dev.wgrgwg.somniverse.dream.dto.request.DreamCreateRequest;
 import dev.wgrgwg.somniverse.dream.dto.request.DreamUpdateRequest;
@@ -23,6 +24,7 @@ public class DreamService {
 
     private final DreamRepository dreamRepository;
     private final MemberService memberService;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public DreamResponse createDream(DreamCreateRequest request, Long memberId) {
@@ -113,9 +115,12 @@ public class DreamService {
     @Transactional
     public void deleteDream(Long dreamId, Long memberId) {
         Dream dream = getDreamOrThrow(dreamId);
+
         validateOwner(dream, memberId);
 
         dream.softDelete();
+
+        commentRepository.softDeleteByDream(dreamId, dream.getDeletedAt());
     }
 
     @Transactional
