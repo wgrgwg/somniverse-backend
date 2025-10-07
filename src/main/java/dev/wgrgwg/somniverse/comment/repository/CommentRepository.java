@@ -15,7 +15,14 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     Page<Comment> findAllByParentId(Long parentId, Pageable pageable);
 
-    Page<Comment> findAllByDreamIdAndParentIsNull(Long parentId, Pageable pageable);
+    @Query("""
+        SELECT c
+        FROM Comment c
+        JOIN FETCH c.member
+        WHERE c.dream.id = :dreamId
+        AND c.parent IS NULL
+        """)
+    Page<Comment> findAllByDreamIdAndParentIsNull(Long dreamId, Pageable pageable);
 
     @Query("SELECT c.parent.id, COUNT(c) " +
         "FROM Comment c " +
