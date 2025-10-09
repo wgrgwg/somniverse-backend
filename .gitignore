@@ -38,3 +38,11 @@ out/
 
 ### Custom ###
 src/main/**/application-local.yml
+
+### k6 secrets & outputs ###
+k6/env/*.env
+k6/results/*
+k6/env/*.json
+
+### node ###
+node_modules
