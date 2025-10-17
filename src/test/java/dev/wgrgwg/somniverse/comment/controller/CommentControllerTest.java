@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -24,6 +25,8 @@ import dev.wgrgwg.somniverse.comment.service.CommentService;
 import dev.wgrgwg.somniverse.config.AppProperties;
 import dev.wgrgwg.somniverse.dream.service.DreamService;
 import dev.wgrgwg.somniverse.global.exception.CustomException;
+import dev.wgrgwg.somniverse.global.idempotency.filter.IdempotencyFilter;
+import dev.wgrgwg.somniverse.global.idempotency.store.IdempotencyRepository;
 import dev.wgrgwg.somniverse.global.util.RefreshTokenCookieUtil;
 import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
 import dev.wgrgwg.somniverse.member.repository.AccessTokenBlackListRepository;
@@ -41,6 +44,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
@@ -58,6 +62,7 @@ import org.springframework.test.web.servlet.ResultActions;
 @Import(SecurityConfig.class)
 @ActiveProfiles("test")
 @EnableConfigurationProperties(AppProperties.class)
+@AutoConfigureMockMvc(addFilters = false)
 class CommentControllerTest {
 
     @Autowired
@@ -95,6 +100,12 @@ class CommentControllerTest {
 
     @MockitoBean
     private ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockitoBean
+    private IdempotencyRepository idempotencyRepository;
+
+    @MockitoBean
+    private IdempotencyFilter idempotencyFilter;
 
     @Nested
     @DisplayName("댓글 생성 api 테스트")
@@ -191,6 +202,7 @@ class CommentControllerTest {
 
             // then
             resultActions.andExpect(status().isNoContent());
+            resultActions.andDo(print());
         }
 
         @Test
