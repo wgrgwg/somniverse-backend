@@ -18,6 +18,8 @@ public class AppProperties {
 
     private final Cors cors = new Cors();
 
+    private final Idempotency idempotency = new Idempotency();
+
     @Getter
     @Setter
     public static class Jwt {
@@ -39,5 +41,15 @@ public class AppProperties {
     public static class Cors {
 
         private List<String> allowedOrigins;
+    }
+
+    @Getter
+    @Setter
+    public static class Idempotency {
+
+        private int ttlSeconds;
+        private int inProgressTtl;
+        private int retryAfterSeconds;
+        private List<String> includePaths;
     }
 }
