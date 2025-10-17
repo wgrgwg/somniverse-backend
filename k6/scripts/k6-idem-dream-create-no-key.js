@@ -40,8 +40,7 @@ export default function ({token}) {
   check(res1, {'first 201': r => r.status === 201});
 
   const res2 = http.post(url, payload, params);
-  check(res2,
-      {'second accepted-ish': r => [200, 201, 409, 500].includes(r.status)});
+  check(res2, {'second 201': r => r.status === 201});
 
   sleep(1);
 }

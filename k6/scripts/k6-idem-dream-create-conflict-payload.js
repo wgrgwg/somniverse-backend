@@ -48,7 +48,7 @@ export default function ({token}) {
     isPublic: true
   });
   const r1 = http.post(url, p1, params);
-  check(r1, {'first 201/200': r => r.status === 201 || r.status === 200});
+  check(r1, {'first 201': r => r.status === 201});
 
   const p2 = JSON.stringify({
     title: 'k6-idem-conflict',
@@ -58,7 +58,7 @@ export default function ({token}) {
   });
   const r2 = http.post(url, p2, params);
   check(r2, {
-    'second conflict on diff payload': r => [409, 400, 422].includes(r.status)
+    'second conflict(409) on diff payload': r => [409].includes(r.status)
   });
 
   sleep(1);

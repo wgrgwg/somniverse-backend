@@ -43,12 +43,10 @@ export default function ({token}) {
   };
 
   const res1 = http.post(url, payload, params);
-  check(res1, {'first 201/200': r => r.status === 201 || r.status === 200});
+  check(res1, {'first 201': r => r.status === 201});
 
   const res2 = http.post(url, payload, params);
-  check(res2, {
-    'second stored-or-in-progress': r => [200, 201, 202].includes(r.status)
-  });
+  check(res2, {'second 201': r => r.status === 201});
 
   sleep(1);
 }
