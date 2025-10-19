@@ -1,6 +1,7 @@
 package dev.wgrgwg.somniverse.member.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -12,6 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.wgrgwg.somniverse.config.AppProperties;
 import dev.wgrgwg.somniverse.global.exception.CustomException;
+import dev.wgrgwg.somniverse.global.idempotency.filter.IdempotencyFilter;
+import dev.wgrgwg.somniverse.global.idempotency.store.IdempotencyRepository;
 import dev.wgrgwg.somniverse.global.util.RefreshTokenCookieUtil;
 import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.request.MemberUsernameUpdateRequest;
@@ -27,6 +30,9 @@ import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationFailureH
 import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationSuccessHandler;
 import dev.wgrgwg.somniverse.security.oauth.service.CustomOAuth2UserService;
 import dev.wgrgwg.somniverse.support.security.WithMockCustomUser;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -79,6 +85,12 @@ class MemberControllerTest {
     @MockitoBean
     private ClientRegistrationRepository clientRegistrationRepository;
 
+    @MockitoBean
+    private IdempotencyRepository idempotencyRepository;
+
+    @MockitoBean
+    private IdempotencyFilter idempotencyFilter;
+
     private SignupRequest signupRequestDto;
     private MemberResponse responseDto;
 
@@ -97,6 +109,17 @@ class MemberControllerTest {
             "사용자",
             LocalDateTime.now()
         );
+    }
+
+    @BeforeEach
+    void passThroughFilters() throws Exception {
+        doAnswer(inv -> {
+            ServletRequest req = inv.getArgument(0);
+            ServletResponse res = inv.getArgument(1);
+            FilterChain chain = inv.getArgument(2);
+            chain.doFilter(req, res);
+            return null;
+        }).when(idempotencyFilter).doFilter(any(), any(), any());
     }
 
     @Nested

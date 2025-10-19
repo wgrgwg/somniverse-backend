@@ -2,6 +2,7 @@ package dev.wgrgwg.somniverse.member.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,6 +15,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.wgrgwg.somniverse.comment.service.CommentService;
 import dev.wgrgwg.somniverse.config.AppProperties;
 import dev.wgrgwg.somniverse.dream.service.DreamService;
+import dev.wgrgwg.somniverse.global.idempotency.filter.IdempotencyFilter;
+import dev.wgrgwg.somniverse.global.idempotency.store.IdempotencyRepository;
 import dev.wgrgwg.somniverse.global.util.RefreshTokenCookieUtil;
 import dev.wgrgwg.somniverse.member.domain.Role;
 import dev.wgrgwg.somniverse.member.dto.request.MemberRoleUpdateRequest;
@@ -27,8 +30,12 @@ import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationFailureH
 import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationSuccessHandler;
 import dev.wgrgwg.somniverse.security.oauth.service.CustomOAuth2UserService;
 import dev.wgrgwg.somniverse.support.security.WithMockCustomUser;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -91,6 +98,23 @@ public class AdminMemberControllerTest {
 
     @MockitoBean
     private ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockitoBean
+    private IdempotencyRepository idempotencyRepository;
+
+    @MockitoBean
+    private IdempotencyFilter idempotencyFilter;
+
+    @BeforeEach
+    void passThroughFilters() throws Exception {
+        doAnswer(inv -> {
+            ServletRequest req = inv.getArgument(0);
+            ServletResponse res = inv.getArgument(1);
+            FilterChain chain = inv.getArgument(2);
+            chain.doFilter(req, res);
+            return null;
+        }).when(idempotencyFilter).doFilter(any(), any(), any());
+    }
 
     @Nested
     @DisplayName("관리자 회원 조회 API 테스트")
@@ -246,7 +270,7 @@ public class AdminMemberControllerTest {
         void updateMemberRole_fail_whenNotAdmin_test() throws Exception {
             // given
             long memberId = 1L;
-            MemberRoleUpdateRequest invalidRequest = new MemberRoleUpdateRequest(null);
+            MemberRoleUpdateRequest invalidRequest = new MemberRoleUpdateRequest(Role.USER);
 
             // when
             ResultActions resultActions = mockMvc.perform(

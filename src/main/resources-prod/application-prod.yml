@@ -54,5 +54,13 @@ app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS}
 
+  idempotency:
+    ttl-seconds: 120
+    in-progress-ttl: 120
+    retry-after-seconds: 2
+    include-paths:
+      - /api/dreams
+      - /api/comments
+
 server:
   forward-headers-strategy: framework

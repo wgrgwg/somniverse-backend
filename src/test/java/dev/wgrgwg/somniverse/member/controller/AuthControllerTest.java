@@ -1,6 +1,7 @@
 package dev.wgrgwg.somniverse.member.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -17,6 +18,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.wgrgwg.somniverse.config.AppProperties;
 import dev.wgrgwg.somniverse.global.errorcode.CommonErrorCode;
 import dev.wgrgwg.somniverse.global.exception.CustomException;
+import dev.wgrgwg.somniverse.global.idempotency.filter.IdempotencyFilter;
+import dev.wgrgwg.somniverse.global.idempotency.store.IdempotencyRepository;
 import dev.wgrgwg.somniverse.global.util.RefreshTokenCookieUtil;
 import dev.wgrgwg.somniverse.member.dto.request.LoginRequest;
 import dev.wgrgwg.somniverse.member.dto.response.TokenResponse;
@@ -28,7 +31,11 @@ import dev.wgrgwg.somniverse.security.jwt.provider.JwtProvider;
 import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationFailureHandler;
 import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationSuccessHandler;
 import dev.wgrgwg.somniverse.security.oauth.service.CustomOAuth2UserService;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.Cookie;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -81,6 +88,23 @@ public class AuthControllerTest {
 
     @MockitoBean
     private ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockitoBean
+    private IdempotencyRepository idempotencyRepository;
+
+    @MockitoBean
+    private IdempotencyFilter idempotencyFilter;
+
+    @BeforeEach
+    void passThroughFilters() throws Exception {
+        doAnswer(inv -> {
+            ServletRequest req = inv.getArgument(0);
+            ServletResponse res = inv.getArgument(1);
+            FilterChain chain = inv.getArgument(2);
+            chain.doFilter(req, res);
+            return null;
+        }).when(idempotencyFilter).doFilter(any(), any(), any());
+    }
 
     @Nested
     @DisplayName("로그인 api 테스트")
