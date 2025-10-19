@@ -1,6 +1,7 @@
 package dev.wgrgwg.somniverse.security.config;
 
 import dev.wgrgwg.somniverse.config.AppProperties;
+import dev.wgrgwg.somniverse.global.idempotency.filter.IdempotencyFilter;
 import dev.wgrgwg.somniverse.security.jwt.filter.JwtAuthenticationFilter;
 import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationFailureHandler;
 import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationSuccessHandler;
@@ -28,20 +29,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private static final String[] AUTH_WHITELIST = {
-        "/",
-        "/error",
-        "/api/auth/**",
-        "/swagger-ui/**",
-        "/v3/api-docs/**",
-        "/swagger-resources/**",
-        "/actuator/health"
-    };
+    private static final String[] AUTH_WHITELIST = {"/", "/error", "/api/auth/**", "/swagger-ui/**",
+        "/v3/api-docs/**", "/swagger-resources/**", "/actuator/health"};
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oauth2AuthenticationFailureHandler;
+    private final IdempotencyFilter idempotencyFilter;
     private final AppProperties appProperties;
 
     @Bean
@@ -76,25 +71,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
         OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler) throws Exception {
-        http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable).formLogin(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable).sessionManagement(
                 session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/admin/members/**")
-                .hasAnyAuthority("ADMIN")
-                .requestMatchers("/api/admin/**")
-                .hasAnyAuthority("ADMIN", "MANAGER")
-                .requestMatchers(AUTH_WHITELIST).permitAll()
-                .anyRequest().authenticated())
-            .oauth2Login(oauth2 -> oauth2
-                .userInfoEndpoint(userInfo -> userInfo
-                    .userService(customOAuth2UserService))
+            .authorizeHttpRequests(
+                auth -> auth.requestMatchers("/api/admin/members/**").hasAnyAuthority("ADMIN")
+                    .requestMatchers("/api/admin/**").hasAnyAuthority("ADMIN", "MANAGER")
+                    .requestMatchers(AUTH_WHITELIST).permitAll().anyRequest().authenticated())
+            .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(
+                    userInfo -> userInfo.userService(customOAuth2UserService))
                 .successHandler(oauth2AuthenticationSuccessHandler)
                 .failureHandler(oauth2AuthenticationFailureHandler))
-            .addFilterBefore(jwtAuthenticationFilter,
-                UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(idempotencyFilter, JwtAuthenticationFilter.class)
+        ;
 
         return http.build();
     }

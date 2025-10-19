@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.wgrgwg.somniverse.comment.service.CommentService;
 import dev.wgrgwg.somniverse.config.AppProperties;
 import dev.wgrgwg.somniverse.dream.service.DreamService;
+import dev.wgrgwg.somniverse.global.idempotency.filter.IdempotencyFilter;
+import dev.wgrgwg.somniverse.global.idempotency.store.IdempotencyRepository;
 import dev.wgrgwg.somniverse.global.util.RefreshTokenCookieUtil;
 import dev.wgrgwg.somniverse.member.repository.AccessTokenBlackListRepository;
 import dev.wgrgwg.somniverse.member.service.AuthService;
@@ -25,6 +27,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -37,6 +40,7 @@ import org.springframework.test.web.servlet.ResultActions;
 @Import(SecurityConfig.class)
 @ActiveProfiles("test")
 @EnableConfigurationProperties(AppProperties.class)
+@AutoConfigureMockMvc(addFilters = false)
 class AdminCommentControllerTest {
 
     @Autowired
@@ -74,6 +78,12 @@ class AdminCommentControllerTest {
 
     @MockitoBean
     private ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockitoBean
+    private IdempotencyRepository idempotencyRepository;
+
+    @MockitoBean
+    private IdempotencyFilter idempotencyFilter;
 
     @Nested
     @DisplayName("관리자 댓글 삭제 API 테스트")
