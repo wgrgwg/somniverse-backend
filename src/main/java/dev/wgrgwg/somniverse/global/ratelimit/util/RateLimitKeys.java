@@ -1,5 +1,6 @@
 package dev.wgrgwg.somniverse.global.ratelimit.util;
 
+import dev.wgrgwg.somniverse.global.util.HashUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,8 @@ public final class RateLimitKeys {
     }
 
     public static String ipUaBucket(String ip, String uaHash, String policy) {
-        return NAMESPACE + SEP + SEG_IPUA + SEP + ip + SEP + uaHash + SEP + policy;
+        String ipHash = HashUtil.sha256(ip);
+        
+        return NAMESPACE + SEP + SEG_IPUA + SEP + ipHash + SEP + uaHash + SEP + policy;
     }
 }
