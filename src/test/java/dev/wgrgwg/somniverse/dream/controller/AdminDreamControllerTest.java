@@ -19,6 +19,7 @@ import dev.wgrgwg.somniverse.dream.dto.response.DreamSimpleResponse;
 import dev.wgrgwg.somniverse.dream.service.DreamService;
 import dev.wgrgwg.somniverse.global.idempotency.filter.IdempotencyFilter;
 import dev.wgrgwg.somniverse.global.idempotency.store.IdempotencyRepository;
+import dev.wgrgwg.somniverse.global.ratelimit.filter.RateLimitFilter;
 import dev.wgrgwg.somniverse.global.util.RefreshTokenCookieUtil;
 import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
 import dev.wgrgwg.somniverse.member.repository.AccessTokenBlackListRepository;
@@ -95,6 +96,9 @@ class AdminDreamControllerTest {
 
     @MockitoBean
     private IdempotencyFilter idempotencyFilter;
+    
+    @MockitoBean
+    private RateLimitFilter rateLimitFilter;
 
     @Nested
     @DisplayName("관리자 권한 꿈일기 조회 api 테스트")
