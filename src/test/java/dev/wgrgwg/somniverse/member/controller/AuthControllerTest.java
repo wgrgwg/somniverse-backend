@@ -20,6 +20,7 @@ import dev.wgrgwg.somniverse.global.errorcode.CommonErrorCode;
 import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.global.idempotency.filter.IdempotencyFilter;
 import dev.wgrgwg.somniverse.global.idempotency.store.IdempotencyRepository;
+import dev.wgrgwg.somniverse.global.ratelimit.filter.RateLimitFilter;
 import dev.wgrgwg.somniverse.global.util.RefreshTokenCookieUtil;
 import dev.wgrgwg.somniverse.member.dto.request.LoginRequest;
 import dev.wgrgwg.somniverse.member.dto.response.TokenResponse;
@@ -95,6 +96,9 @@ public class AuthControllerTest {
     @MockitoBean
     private IdempotencyFilter idempotencyFilter;
 
+    @MockitoBean
+    private RateLimitFilter rateLimitFilter;
+
     @BeforeEach
     void passThroughFilters() throws Exception {
         doAnswer(inv -> {
@@ -104,6 +108,12 @@ public class AuthControllerTest {
             chain.doFilter(req, res);
             return null;
         }).when(idempotencyFilter).doFilter(any(), any(), any());
+
+        doAnswer(inv -> {
+            FilterChain chain = inv.getArgument(2);
+            chain.doFilter(inv.getArgument(0), inv.getArgument(1));
+            return null;
+        }).when(rateLimitFilter).doFilter(any(), any(), any());
     }
 
     @Nested

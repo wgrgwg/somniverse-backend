@@ -13,6 +13,7 @@ import dev.wgrgwg.somniverse.config.AppProperties;
 import dev.wgrgwg.somniverse.dream.service.DreamService;
 import dev.wgrgwg.somniverse.global.idempotency.filter.IdempotencyFilter;
 import dev.wgrgwg.somniverse.global.idempotency.store.IdempotencyRepository;
+import dev.wgrgwg.somniverse.global.ratelimit.filter.RateLimitFilter;
 import dev.wgrgwg.somniverse.global.util.RefreshTokenCookieUtil;
 import dev.wgrgwg.somniverse.member.repository.AccessTokenBlackListRepository;
 import dev.wgrgwg.somniverse.member.service.AuthService;
@@ -84,6 +85,9 @@ class AdminCommentControllerTest {
 
     @MockitoBean
     private IdempotencyFilter idempotencyFilter;
+
+    @MockitoBean
+    private RateLimitFilter rateLimitFilter;
 
     @Nested
     @DisplayName("관리자 댓글 삭제 API 테스트")

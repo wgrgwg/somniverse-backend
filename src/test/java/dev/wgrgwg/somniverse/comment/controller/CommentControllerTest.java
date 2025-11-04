@@ -27,6 +27,7 @@ import dev.wgrgwg.somniverse.dream.service.DreamService;
 import dev.wgrgwg.somniverse.global.exception.CustomException;
 import dev.wgrgwg.somniverse.global.idempotency.filter.IdempotencyFilter;
 import dev.wgrgwg.somniverse.global.idempotency.store.IdempotencyRepository;
+import dev.wgrgwg.somniverse.global.ratelimit.filter.RateLimitFilter;
 import dev.wgrgwg.somniverse.global.util.RefreshTokenCookieUtil;
 import dev.wgrgwg.somniverse.member.dto.response.MemberResponse;
 import dev.wgrgwg.somniverse.member.repository.AccessTokenBlackListRepository;
@@ -106,6 +107,9 @@ class CommentControllerTest {
 
     @MockitoBean
     private IdempotencyFilter idempotencyFilter;
+
+    @MockitoBean
+    private RateLimitFilter rateLimitFilter;
 
     @Nested
     @DisplayName("댓글 생성 api 테스트")
