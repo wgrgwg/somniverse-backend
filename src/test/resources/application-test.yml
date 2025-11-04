@@ -33,3 +33,39 @@ app:
   cors:
     allowed-origins:
       - http://localhost:5173
+
+  idempotency:
+    ttl-seconds: 120
+    in-progress-ttl: 120
+    retry-after-seconds: 2
+    include-paths:
+      - /api/dreams
+      - /api/comments
+
+  rate-limit:
+    enabled: true
+    add-headers: true
+    whitelist-paths:
+      - /actuator/**
+      - /swagger-ui/**
+      - /v3/api-docs/**
+    policies:
+      - name: auth
+        paths: [ /api/auth/** ]
+        methods: [ POST ]
+        key-strategy: ipUa
+        limits:
+          - { capacity: 5,  refill: PT1M }
+      - name: write
+        paths: [ /api/** ]
+        methods: [ POST, PUT, DELETE ]
+        key-strategy: user
+        limits:
+          - { capacity: 10, refill: PT1M }
+      - name: read
+        paths: [ /api/** ]
+        methods: [ GET ]
+        key-strategy: user
+        limits:
+          - { capacity: 10, refill: PT1S }
+          - { capacity: 60, refill: PT1M }

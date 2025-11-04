@@ -62,5 +62,33 @@ app:
       - /api/dreams
       - /api/comments
 
+  rate-limit:
+    enabled: true
+    add-headers: true
+    whitelist-paths:
+      - /actuator/**
+      - /swagger-ui/**
+      - /v3/api-docs/**
+    policies:
+      - name: auth
+        paths: [ /api/auth/** ]
+        methods: [ POST ]
+        key-strategy: ipUa
+        limits:
+          - { capacity: 5,  refill: PT1M }
+      - name: write
+        paths: [ /api/** ]
+        methods: [ POST, PUT, DELETE ]
+        key-strategy: user
+        limits:
+          - { capacity: 10, refill: PT1M }
+      - name: read
+        paths: [ /api/** ]
+        methods: [ GET ]
+        key-strategy: user
+        limits:
+          - { capacity: 10, refill: PT1S }
+          - { capacity: 60, refill: PT1M }
+
 server:
   forward-headers-strategy: framework

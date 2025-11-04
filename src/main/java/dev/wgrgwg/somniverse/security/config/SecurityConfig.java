@@ -2,6 +2,7 @@ package dev.wgrgwg.somniverse.security.config;
 
 import dev.wgrgwg.somniverse.config.AppProperties;
 import dev.wgrgwg.somniverse.global.idempotency.filter.IdempotencyFilter;
+import dev.wgrgwg.somniverse.global.ratelimit.filter.RateLimitFilter;
 import dev.wgrgwg.somniverse.security.jwt.filter.JwtAuthenticationFilter;
 import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationFailureHandler;
 import dev.wgrgwg.somniverse.security.oauth.handler.OAuth2AuthenticationSuccessHandler;
@@ -37,6 +38,7 @@ public class SecurityConfig {
     private final OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oauth2AuthenticationFailureHandler;
     private final IdempotencyFilter idempotencyFilter;
+    private final RateLimitFilter rateLimitFilter;
     private final AppProperties appProperties;
 
     @Bean
@@ -84,8 +86,8 @@ public class SecurityConfig {
                 .successHandler(oauth2AuthenticationSuccessHandler)
                 .failureHandler(oauth2AuthenticationFailureHandler))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(idempotencyFilter, JwtAuthenticationFilter.class)
-        ;
+            .addFilterAfter(rateLimitFilter, JwtAuthenticationFilter.class)
+            .addFilterAfter(idempotencyFilter, RateLimitFilter.class);
 
         return http.build();
     }

@@ -51,6 +51,10 @@ dependencies {
     testRuntimeOnly("com.h2database:h2")
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    implementation "com.bucket4j:bucket4j_jdk17-core:8.15.0"
+    implementation "com.bucket4j:bucket4j_jdk17-redis-common:8.15.0"
+    implementation "com.bucket4j:bucket4j_jdk17-lettuce:8.15.0"
 }
 
 sourceSets {
