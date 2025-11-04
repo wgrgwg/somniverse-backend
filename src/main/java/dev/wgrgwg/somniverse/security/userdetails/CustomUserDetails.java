@@ -20,7 +20,7 @@ public class CustomUserDetails implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority(member.getRole().name()));
     }
-
+    
     @Override
     public String getPassword() {
         return member.getPassword();
