@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.wgrgwg.somniverse.config.AppProperties;
+import dev.wgrgwg.somniverse.dream.domain.DreamAnalysisStatus;
 import dev.wgrgwg.somniverse.dream.dto.response.DreamResponse;
 import dev.wgrgwg.somniverse.dream.dto.response.DreamSimpleResponse;
 import dev.wgrgwg.somniverse.dream.service.DreamService;
@@ -96,7 +97,7 @@ class AdminDreamControllerTest {
 
     @MockitoBean
     private IdempotencyFilter idempotencyFilter;
-    
+
     @MockitoBean
     private RateLimitFilter rateLimitFilter;
 
@@ -111,9 +112,12 @@ class AdminDreamControllerTest {
             // given
             Pageable pageable = PageRequest.of(0, 10);
             List<DreamSimpleResponse> content = List.of(
-                new DreamSimpleResponse(1L, "꿈1", LocalDate.now(), LocalDateTime.now(), "user1"),
-                new DreamSimpleResponse(1L, "꿈2", LocalDate.now(), LocalDateTime.now(), "user2"),
-                new DreamSimpleResponse(1L, "삭제된 꿈", LocalDate.now(), LocalDateTime.now(), "user1")
+                new DreamSimpleResponse(1L, "꿈1", LocalDate.now(), LocalDateTime.now(), "user1",
+                    "즐거움"),
+                new DreamSimpleResponse(1L, "꿈2", LocalDate.now(), LocalDateTime.now(), "user2",
+                    "즐거움"),
+                new DreamSimpleResponse(1L, "삭제된 꿈", LocalDate.now(), LocalDateTime.now(), "user1",
+                    "즐거움")
             );
 
             Page<DreamSimpleResponse> responsePage = new PageImpl<>(content, pageable, 3);
@@ -139,7 +143,8 @@ class AdminDreamControllerTest {
             MemberResponse author = new MemberResponse(1L, "test@email.com", "testuser", "USER",
                 LocalDateTime.now());
             DreamResponse dreamResponse = new DreamResponse(dreamId, "삭제된 꿈", "내용", LocalDate.now(),
-                false, LocalDateTime.now(), LocalDateTime.now(), author, true);
+                false, LocalDateTime.now(), LocalDateTime.now(), author, true,
+                DreamAnalysisStatus.COMPLETED.toString(), "즐거움");
             when(dreamService.getDreamForAdmin(anyLong(), anyBoolean())).thenReturn(dreamResponse);
 
             // when

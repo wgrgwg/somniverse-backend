@@ -23,8 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class DreamService {
 
     private final DreamRepository dreamRepository;
-    private final MemberService memberService;
     private final CommentRepository commentRepository;
+    private final MemberService memberService;
+    private final DreamAnalysisService dreamAnalysisService;
 
     @Transactional
     public DreamResponse createDream(DreamCreateRequest request, Long memberId) {
@@ -35,6 +36,12 @@ public class DreamService {
             .isPublic(request.isPublic()).member(currentMember).build();
 
         Dream savedDream = dreamRepository.save(dream);
+
+        dreamAnalysisService.analyzeAndSaveEmotion(
+            savedDream.getId(),
+            savedDream.getTitle(),
+            savedDream.getContent()
+        );
 
         return DreamResponse.fromEntity(savedDream);
     }
@@ -107,7 +114,17 @@ public class DreamService {
         Dream dream = getDreamOrThrow(dreamId);
         validateOwner(dream, memberId);
 
+        boolean needAnalysis = !dream.getTitle().equals(request.title())
+            || !dream.getContent().equals(request.content());
+
         dream.update(request.title(), request.content(), request.dreamDate(), request.isPublic());
+
+        if (needAnalysis) {
+            dream.resetAnalysis();
+
+            dreamAnalysisService.analyzeAndSaveEmotion(dream.getId(), dream.getTitle(),
+                dream.getContent());
+        }
 
         return DreamResponse.fromEntity(dream);
     }

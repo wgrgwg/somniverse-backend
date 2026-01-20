@@ -90,5 +90,9 @@ app:
           - { capacity: 10, refill: PT1S }
           - { capacity: 60, refill: PT1M }
 
+gemini:
+  api-key: ${GEMINI_API_KEY}
+  model-name: 'gemini-2.5-flash-lite'
+
 server:
   forward-headers-strategy: framework

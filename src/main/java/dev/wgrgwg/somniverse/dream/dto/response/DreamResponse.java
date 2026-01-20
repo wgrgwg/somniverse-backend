@@ -16,7 +16,9 @@ public record DreamResponse(
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
     MemberResponse author,
-    boolean isDeleted
+    boolean isDeleted,
+    String analysisStatus,
+    String emotion
 ) {
 
     public static DreamResponse fromEntity(Dream dream) {
@@ -29,7 +31,9 @@ public record DreamResponse(
             dream.getCreatedAt(),
             dream.getUpdatedAt(),
             MemberResponse.fromEntity(dream.getMember()),
-            dream.isDeleted()
+            dream.isDeleted(),
+            dream.getAnalysisStatus().toString(),
+            dream.getEmotion()
         );
     }
 }
