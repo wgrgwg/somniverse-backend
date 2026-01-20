@@ -25,6 +25,9 @@ class SomniverseApplicationTests {
     @MockitoBean
     private RateLimitConfig rateLimitConfig;
 
+    @MockitoBean
+    private com.google.genai.Client genaiClient;
+
     @Test
     void contextLoads() {
     }
