@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.scheduling.annotation.Async;
@@ -30,6 +32,8 @@ public class DreamAnalysisService {
     private final DreamRepository dreamRepository;
     private final ResourceLoader resourceLoader;
     private final GenerateContentConfig generateContentConfig;
+
+    private static final Logger GEMINI_USAGE_LOG = LoggerFactory.getLogger("GEMINI_USAGE");
 
     private String promptTemplate;
 
@@ -54,6 +58,16 @@ public class DreamAnalysisService {
 
             GenerateContentResponse response = geminiClient.models.generateContent(
                 geminiProperties.getModelName(), prompt, generateContentConfig);
+
+            response.usageMetadata().ifPresent(usage -> {
+                int promptTokens = usage.promptTokenCount().orElse(0);
+                int outputTokens = usage.candidatesTokenCount().orElse(0);
+                int totalTokens = usage.totalTokenCount().orElse(0);
+
+                GEMINI_USAGE_LOG.info(
+                    "dreamId={} model={} inputTokens={} outputTokens={} totalTokens={}", dreamId,
+                    geminiProperties.getModelName(), promptTokens, outputTokens, totalTokens);
+            });
 
             String emotion = response.text().trim();
 
