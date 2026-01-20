@@ -51,6 +51,9 @@ class DreamServiceTest {
     @InjectMocks
     private DreamService dreamService;
 
+    @Mock
+    private DreamAnalysisService dreamAnalysisService;
+
     private Member testMember;
     private Member otherMember;
     private Dream testDream;

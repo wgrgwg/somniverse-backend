@@ -46,3 +46,7 @@ k6/env/*.json
 
 ### node ###
 node_modules
+
+### logs ###
+logs/
+**.log

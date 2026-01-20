@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.wgrgwg.somniverse.config.AppProperties;
+import dev.wgrgwg.somniverse.dream.domain.DreamAnalysisStatus;
 import dev.wgrgwg.somniverse.dream.dto.request.DreamCreateRequest;
 import dev.wgrgwg.somniverse.dream.dto.request.DreamUpdateRequest;
 import dev.wgrgwg.somniverse.dream.dto.response.DreamResponse;
@@ -166,7 +167,7 @@ class DreamControllerTest {
                 Role.USER.toString(), LocalDateTime.now());
             DreamResponse dreamResponse = new DreamResponse(dreamId, "수정된 꿈",
                 "수정된 내용", LocalDate.now(), false, LocalDateTime.now(), LocalDateTime.now(),
-                memberResponse, false);
+                memberResponse, false, DreamAnalysisStatus.PENDING.toString(), null);
 
             when(dreamService.updateDream(anyLong(), anyLong(),
                 any(DreamUpdateRequest.class))).thenReturn(dreamResponse);
@@ -217,7 +218,7 @@ class DreamControllerTest {
             Pageable pageable = PageRequest.of(0, 10);
             List<DreamSimpleResponse> content = List.of(
                 new DreamSimpleResponse(101L, "공개 꿈 1", LocalDate.now(), LocalDateTime.now(),
-                    "user1"));
+                    "user1", null));
             Page<DreamSimpleResponse> responsePage = new PageImpl<>(content, pageable, 1);
 
             when(dreamService.getPublicDreams(any(Pageable.class))).thenReturn(responsePage);
@@ -241,7 +242,8 @@ class DreamControllerTest {
             MemberResponse author = new MemberResponse(2L, "other@email.com", "otheruser", "USER",
                 LocalDateTime.now());
             DreamResponse dreamResponse = new DreamResponse(dreamId, "공개 꿈", "내용", LocalDate.now(),
-                true, LocalDateTime.now(), LocalDateTime.now(), author, false);
+                true, LocalDateTime.now(), LocalDateTime.now(), author, false,
+                DreamAnalysisStatus.COMPLETED.toString(), "즐거움");
 
             when(dreamService.getDreamWithAccessControl(anyLong(), anyLong(),
                 anyBoolean())).thenReturn(dreamResponse);
@@ -282,7 +284,7 @@ class DreamControllerTest {
             Pageable pageable = PageRequest.of(0, 10);
             List<DreamSimpleResponse> content = List.of(
                 new DreamSimpleResponse(103L, "다른 사용자 꿈", LocalDate.now(), LocalDateTime.now(),
-                    "otheruser"));
+                    "otheruser", "즐거움"));
             Page<DreamSimpleResponse> responsePage = new PageImpl<>(content, pageable, 1);
 
             when(dreamService.getPublicDreamsByMember(anyLong(), any(Pageable.class))).thenReturn(
@@ -312,9 +314,9 @@ class DreamControllerTest {
             Pageable pageable = PageRequest.of(0, 10);
             List<DreamSimpleResponse> content = List.of(
                 new DreamSimpleResponse(101L, "나의 공개 꿈", LocalDate.now(), LocalDateTime.now(),
-                    "testuser"),
+                    "testuser", "즐거움"),
                 new DreamSimpleResponse(102L, "나의 비공개 꿈", LocalDate.now(), LocalDateTime.now(),
-                    "testuser")
+                    "testuser", "즐거움")
             );
             Page<DreamSimpleResponse> responsePage = new PageImpl<>(content, pageable, 2);
             when(dreamService.getMyDreams(anyLong(), any(Pageable.class))).thenReturn(

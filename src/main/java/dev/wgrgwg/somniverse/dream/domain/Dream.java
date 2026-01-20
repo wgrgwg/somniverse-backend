@@ -3,6 +3,8 @@ package dev.wgrgwg.somniverse.dream.domain;
 import dev.wgrgwg.somniverse.comment.domain.Comment;
 import dev.wgrgwg.somniverse.member.domain.Member;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -54,6 +56,11 @@ public class Dream {
     private boolean isDeleted;
     private LocalDateTime deletedAt;
 
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private DreamAnalysisStatus analysisStatus = DreamAnalysisStatus.PENDING;
+    private String emotion;
+
     @PrePersist
     public void onCreate() {
         this.isDeleted = false;
@@ -71,6 +78,20 @@ public class Dream {
         this.content = content;
         this.dreamDate = dreamDate;
         this.isPublic = isPublic;
+    }
+
+    public void updateAnalyzedEmotion(String emotion) {
+        this.emotion = emotion;
+        this.analysisStatus = DreamAnalysisStatus.COMPLETED;
+    }
+
+    public void failAnalysis() {
+        this.analysisStatus = DreamAnalysisStatus.FAILED;
+    }
+
+    public void resetAnalysis() {
+        this.emotion = null;
+        this.analysisStatus = DreamAnalysisStatus.PENDING;
     }
 
     public void softDelete() {

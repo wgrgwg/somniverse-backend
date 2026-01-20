@@ -69,3 +69,7 @@ app:
         limits:
           - { capacity: 10, refill: PT1S }
           - { capacity: 60, refill: PT1M }
+
+gemini:
+  api-key: 'gemini-api-key'
+  model-name: 'gemini-2.5-flash-lite'

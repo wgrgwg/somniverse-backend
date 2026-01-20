@@ -5,6 +5,7 @@ import dev.wgrgwg.somniverse.comment.repository.CommentRepository;
 import dev.wgrgwg.somniverse.comment.service.CommentService;
 import dev.wgrgwg.somniverse.dream.domain.Dream;
 import dev.wgrgwg.somniverse.dream.repository.DreamRepository;
+import dev.wgrgwg.somniverse.dream.service.DreamAnalysisService;
 import dev.wgrgwg.somniverse.dream.service.DreamService;
 import dev.wgrgwg.somniverse.member.domain.Member;
 import dev.wgrgwg.somniverse.member.domain.Role;
@@ -38,6 +39,9 @@ class DreamNPlusOneTest {
 
     @MockitoBean
     private MemberService memberService;
+
+    @MockitoBean
+    private DreamAnalysisService dreamAnalysisService;
 
     @Autowired
     private DreamRepository dreamRepository;

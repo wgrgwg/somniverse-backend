@@ -7,7 +7,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum DreamErrorCode implements ErrorCode {
     DREAM_NOT_FOUND("DREAM_001", "해당 꿈일기를 찾을 수 없습니다", HttpStatus.NOT_FOUND),
-    DREAM_FORBIDDEN("DREAM_002", "해당 꿈일기에 대한 권한이 없습니다", HttpStatus.FORBIDDEN);
+    DREAM_FORBIDDEN("DREAM_002", "해당 꿈일기에 대한 권한이 없습니다", HttpStatus.FORBIDDEN),
+    DREAM_ANALYSIS_FAILED("DREAM_003", "꿈 분석 중 오류가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String code;
     private final String message;

@@ -9,7 +9,8 @@ public record DreamSimpleResponse(
     String title,
     LocalDate dreamDate,
     LocalDateTime createdAt,
-    String authorUsername
+    String authorUsername,
+    String emotion
 ) {
 
     public static DreamSimpleResponse fromEntity(Dream dream) {
@@ -18,7 +19,8 @@ public record DreamSimpleResponse(
             dream.getTitle(),
             dream.getDreamDate(),
             dream.getCreatedAt(),
-            dream.getMember().getUsername()
+            dream.getMember().getUsername(),
+            dream.getEmotion()
         );
     }
 }
