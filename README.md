@@ -43,11 +43,15 @@
 
 # 4. :classical_building: 프로젝트 구조
 
-<p align="center"><img src="images/architecture.png" alt="architecture"></p>
+<p style="text-align: center;">
+  <img src="images/architecture.png" alt="architecture">
+</p>
 
 ---
 <br>
 
 # 5. :floppy_disk: ERD
 
-<p align="center"><img src="images/erd.png" alt="ERD"></p>
+<p style="text-align: center;">
+  <img src="images/erd.png" alt="ERD">
+</p>
