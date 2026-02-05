@@ -5,7 +5,7 @@
 ---
 <br>
 
-# 1.  :full_moon_face:서비스 소개
+# 1.  :full_moon_with_face: 서비스 소개
 
 * Somniverse는 꿈 기록 및 공유 서비스입니다.
 
